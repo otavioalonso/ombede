@@ -1,4 +1,4 @@
-AverageGauge = function(element, data, {
+AverageGauge = function(svg, data, {
   quantity = d => d[1],
   time = d => d[0],
   domain = [0, d3.max(data, d => quantity(d))],
@@ -24,21 +24,19 @@ AverageGauge = function(element, data, {
                                       time(d) > d3.timeSecond.offset(now,-i*dt*60))
                           .map(d => quantity(d)))
                }));
-  
+
   let averages = get_averages(data, quantity, now);
   let average = d3.mean(data, d => quantity(d));
 
-  const svg = d3.select(element)
-    .attr("viewBox", [0,0, size.width, size.height])
-    .attr("class", "aG");
-  
+  svg.attr("class", "aG");
+
   const r_scale = d3.scaleLinear()
     .domain(domain)
     .range([0, radius]);
 
   const t_scale = d3.scaleLinear()
     .domain([0,60]);
-    
+
   const lineRadial = d3.lineRadial()
     .curve(d3.curveLinear)
     .radius(d => r_scale(d.average))
@@ -59,7 +57,7 @@ AverageGauge = function(element, data, {
   const circle_averages = svg.append("g")
     .attr("class", "ring")
     .attr("transform", `translate(${center.x},${center.y})`)
-    
+
   circle_averages.selectAll("circle")
     .data(rings(averages), d => d.id)
     .enter().append("circle")
@@ -77,7 +75,7 @@ AverageGauge = function(element, data, {
     .append("line")
     .attr("x1", r_scale(average)-inner_tick_size)
     .attr("x2", r_scale(average)+outer_tick_size);
-  
+
   const path = svg.append("g")
     .attr("class", "line")
     .append("path")
@@ -102,21 +100,21 @@ AverageGauge = function(element, data, {
   return Object.assign(svg.node(), {update(data, now) {
     averages = get_averages(data, quantity, now);
     average = d3.mean(data, d => quantity(d));
-    
+
     path.attr("d", lineRadial(averages));
-    
+
     circle_average.attr("r", r_scale(average));
 
     circle_averages.selectAll("circle")
       .data(rings(averages), d => d.id)
       .attr("r", d => d.r);
-    
+
     time_ticks
       .attr("x1", r_scale(average)-inner_tick_size)
       .attr("x2", r_scale(average)+outer_tick_size);
-    
+
     text_average.text(`${average.toFixed(0)} km/h`);
-    
+
     text_instant_speed.text(`${averages[0].average.toFixed(0)} km/h`)
       .attr("transform", `translate(${center.x},${center.y - r_scale(d3.max([
         averages[0].average,
@@ -127,4 +125,3 @@ AverageGauge = function(element, data, {
     return now;
   }});
 }
-

@@ -3,16 +3,17 @@ const hour = d3.timeSecond.every(10).range(d3.timeHour.offset(Date.now(),-6), Da
 const speed = d3.cumsum(hour.map(e => speed_gen())).map(e => e+50);
 const instant_speed = hour.map((h,i) => ({time: h, speed: speed[i]}));
 
-chart = AverageGauge("svg", instant_speed, {quantity: d => d.speed,
+chart = AverageGauge(d3.select("svg").attr("viewBox", [0,0, 600, 400]), instant_speed, {quantity: d => d.speed,
                                             time: d => d.time,
                                             domain: [0,100]})
 
 var instant_speed_realtime;
 
 hour.forEach((now,i) => {
-	setTimeout( () => {
-		instant_speed_realtime = instant_speed.filter(d => d.time < now)
-		chart.update(instant_speed_realtime, now)
+  setTimeout( () => {
+    instant_speed_realtime = instant_speed.filter(d => d.time < now)
+    chart.update(instant_speed_realtime, now)
 
-	}, i*1000/24)});
+  }, i*1000/24)
+});
 
