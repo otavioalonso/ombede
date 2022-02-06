@@ -2,8 +2,9 @@ AverageGauge = function(svg, data, {
   quantity = d => d[1],
   time = d => d[0],
   domain = [0, d3.max(data, d => quantity(d))],
+  format = t => t,
   now = Date.now(),
-  size = {height: 400, width: 400},
+  size = {height: 300, width: 400},
   margin = {left: 30, right: 30, top: 30, bottom: 30},
   center = {x: (size.width - margin.left - margin.right)/2 + margin.left,
             y: (size.height - margin.top - margin.bottom)/2 + margin.top},
@@ -24,19 +25,19 @@ AverageGauge = function(svg, data, {
                                       time(d) > d3.timeSecond.offset(now,-i*dt*60))
                           .map(d => quantity(d)))
                }));
-
+  
   let averages = get_averages(data, quantity, now);
   let average = d3.mean(data, d => quantity(d));
 
   svg.attr("class", "aG");
-
+  
   const r_scale = d3.scaleLinear()
     .domain(domain)
     .range([0, radius]);
 
   const t_scale = d3.scaleLinear()
     .domain([0,60]);
-
+    
   const lineRadial = d3.lineRadial()
     .curve(d3.curveLinear)
     .radius(d => r_scale(d.average))
@@ -57,7 +58,7 @@ AverageGauge = function(svg, data, {
   const circle_averages = svg.append("g")
     .attr("class", "ring")
     .attr("transform", `translate(${center.x},${center.y})`)
-
+    
   circle_averages.selectAll("circle")
     .data(rings(averages), d => d.id)
     .enter().append("circle")
@@ -75,7 +76,7 @@ AverageGauge = function(svg, data, {
     .append("line")
     .attr("x1", r_scale(average)-inner_tick_size)
     .attr("x2", r_scale(average)+outer_tick_size);
-
+  
   const path = svg.append("g")
     .attr("class", "line")
     .append("path")
@@ -85,7 +86,7 @@ AverageGauge = function(svg, data, {
   const text_average = svg.append("text")
     .attr("class", "textAverage")
     .attr("transform", `translate(${center.x},${center.y})`)
-    .text(`${average.toFixed(0)} km/h`);
+    .text(format(average));
 
   const text_instant_speed = svg.append("text")
     .attr("class", "textInstant")
@@ -94,28 +95,28 @@ AverageGauge = function(svg, data, {
       averages.slice(-1)[0].average,
       average,
     ]))-5})`)
-    .text(`${averages[0].average.toFixed(0)} km/h`);
+    .text(format(averages[0].average));
 
   // Exposes the update method
   return Object.assign(svg.node(), {update(data, now) {
     averages = get_averages(data, quantity, now);
     average = d3.mean(data, d => quantity(d));
-
+    
     path.attr("d", lineRadial(averages));
-
+    
     circle_average.attr("r", r_scale(average));
 
     circle_averages.selectAll("circle")
       .data(rings(averages), d => d.id)
       .attr("r", d => d.r);
-
+    
     time_ticks
       .attr("x1", r_scale(average)-inner_tick_size)
       .attr("x2", r_scale(average)+outer_tick_size);
-
-    text_average.text(`${average.toFixed(0)} km/h`);
-
-    text_instant_speed.text(`${averages[0].average.toFixed(0)} km/h`)
+    
+    text_average.text(format(average));
+    
+    text_instant_speed.text(format(averages[0].average))
       .attr("transform", `translate(${center.x},${center.y - r_scale(d3.max([
         averages[0].average,
         averages.slice(-1)[0].average,
