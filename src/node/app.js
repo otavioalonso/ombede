@@ -1,25 +1,64 @@
-'use strict';
+let speed
+let now
 
-var OBD = require('obd-parser');
+const express = require('express')
+const socketio = require('socket.io')
+// const OBD = require('obd-parser');
+// const getConnector = require('obd-parser-development-connection');
 
-var getConnector = require('obd-parser-development-connection');
+// const connect = getConnector({});
 
-var connect = getConnector({});
+const app = express()
 
-OBD.init(connect)
-  .then(function () {
-    var rpmPoller = new OBD.ECUPoller({
-      pid: new OBD.PIDS.VehicleSpeed(),
-      interval: 100
-    });
+app.set('view engine', 'ejs')
+app.use(express.static('public'))
 
-    rpmPoller.on('data', function (output) {
-      console.log('==== Got Speed Output ====');
-      console.log('time: ', output.ts);
-      console.log('bytes: ', output.bytes);
-      console.log('value: ', output.value);
-      console.log('pretty: ', output.pretty);
-    });
+app.get('/', (request, response)=> {
+    response.render('index')
+})
 
-    rpmPoller.startPolling();
-});
+const server = app.listen(process.env.PORT || 3000, () => {
+    console.log("server is running")
+})
+
+const io = socketio(server, {
+    allowEIO3: true
+})
+
+io.on('connection', socket => {
+    console.log("New user connected")
+    io.sockets.emit('reset')
+
+//    OBD.init(connect)
+//      .then(function () {
+//        var rpmPoller = new OBD.ECUPoller({
+//          pid: new OBD.PIDS.VehicleSpeed(),
+//          interval: 100
+//        });
+//
+//        rpmPoller.on('data', function (output) {
+//            let new_data = {time: new Date(output.ts), speed: output.value}
+//            console.log("Sending data: ", new_data)
+//            io.sockets.emit('new_data', new_data)
+//        });
+//
+//        rpmPoller.startPolling();
+//    });
+
+    speed = 50
+    now = Date.now()
+
+    for(let i = 0; i < 99999; i++) {
+        setTimeout(() => {
+            now = now + 20e3
+            speed = speed + 2*(Math.random() - 0.5)
+            let new_data = {time: now, speed: speed}
+            console.log("Sending data: ", new_data)
+            io.sockets.emit('new_data', new_data)
+        }, i*100)
+    }
+
+})
+
+
+
