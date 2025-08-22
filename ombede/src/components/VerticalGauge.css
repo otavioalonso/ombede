@@ -1,0 +1,40 @@
+/* VerticalGauge component styles */
+
+.vertical-gauge-svg {
+  margin: 0 20px;
+  display: block;
+}
+
+.vertical-gauge-bg {
+  stroke: #eee;
+  stroke-width: 12;
+}
+
+.vertical-gauge-value {
+  stroke-width: 12;
+  stroke-linecap: round;
+}
+
+.vertical-gauge-dot {
+  stroke: #fff;
+  stroke-width: 2;
+  filter: drop-shadow(0 2px 4px #0002);
+}
+
+.vertical-gauge-label {
+  font-size: 16px;
+  fill: #333;
+  text-anchor: middle;
+}
+
+.vertical-gauge-value-label {
+  font-size: 18px;
+  font-weight: bold;
+  text-anchor: middle;
+}
+
+.vertical-gauge-minmax {
+  font-size: 14px;
+  fill: #888;
+  text-anchor: middle;
+}

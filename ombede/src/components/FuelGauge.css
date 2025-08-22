@@ -1,0 +1,27 @@
+
+.gauge-svg {
+  margin: 0 20px;
+}
+
+.gauge-value {
+  text-anchor: middle;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.gauge-unit {
+  text-anchor: middle;
+  font-size: 16px;
+}
+
+.gauge-ethanol {
+  text-anchor: end;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.gauge-gas {
+  text-anchor: start;
+  font-size: 16px;
+  font-weight: bold;
+}

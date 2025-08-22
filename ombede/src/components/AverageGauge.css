@@ -18,19 +18,31 @@ svg.aG .ticks {
 
 svg.aG .line {
   fill: none;
-  stroke-width: 3.5;
+  stroke-width: 4;
   stroke-linecap: round;
   stroke: hsl(90, 90%, 40%);
 }
 
 svg.aG .textInstant {
   text-anchor: middle;
-  font-size: 16pt;
+  font-size: 12pt;
+  font-family: Helvetica;
+  fill: #555;
 }
 
 svg.aG .textAverage {
   text-anchor: middle;
-  alignment-baseline: middle;
-  font-size: 16pt;
+  font-size: 18pt;
+  font-family: Helvetica;
+  font-weight: bold;
+  fill: #555;
+}
+
+
+svg.aG .textUnit {
+  text-anchor: middle;
+  font-size: 12pt;
+  font-family: Helvetica;
+  fill: #555;
 }
 
