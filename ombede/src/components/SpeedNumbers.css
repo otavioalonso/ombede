@@ -1,0 +1,98 @@
+.gear-rpm-value {
+  border-radius: 8px;
+  padding: 4px 12px;
+  min-width: 30px;
+  display: inline-block;
+  color: #fff;
+}
+/* SpeedNumbers component styles */
+
+.gear-layout {
+  background: #f8f8fa;
+  border-radius: 50%;
+  box-shadow: 0 2px 12px #0003;
+  width: 260px;
+  height: 260px;
+  margin: 20px auto;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.gear-visualization {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  position: relative;
+}
+.gear-main {
+  flex: 0 0 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gear-number {
+  font-size: 64px;
+  font-weight: bold;
+  color: #1976d2;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 12px #0001;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+.gear-rpm {
+  flex: 0 0 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.gear-rpm-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: white;
+}
+
+.gear-rpm-top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -55px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gear-rpm-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -75px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.gear-speed {
+  font-size: 38px;
+  color: #666;
+  font-weight: bold;
+}
+
+.gear-speed-unit {
+  font-size: 18px;
+  color: #666;
+  margin-top: -15px;
+}
+

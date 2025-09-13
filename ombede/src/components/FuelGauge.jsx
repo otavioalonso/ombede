@@ -65,7 +65,7 @@ function FuelGauge({ level, ethanol, maxCapacity, colorGas='red', colorEthanol='
 
     textValue = svg.append("text")
       .attr("x", center.x)
-      .attr("y", center.y)
+      .attr("y", center.y+5)
       .attr("fill", colorText)
       .attr("class", "gauge-value");
       

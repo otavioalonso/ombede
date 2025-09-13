@@ -137,14 +137,18 @@ class Ombede {
     }
 
     computeGear() {
-        let diff = 100.0;
-        this.data['GEAR'] = null;
+        let diff = 0.05;
+        this.data['GEAR'] = 0;
         for (const k in this.DIST_PER_REV_DICT) {
-            const newDiff = Math.abs(this.DIST_PER_REV_DICT[k] - this.data['DIST_PER_REV']);
+            const newDiff = Math.abs(this.DIST_PER_REV_DICT[k] - this.data['DIST_PER_REV'])/this.DIST_PER_REV_DICT[k] - 1;
             if (newDiff < diff) {
                 diff = newDiff;
                 this.data['GEAR'] = Number(k);
             }
+        }
+        if (this.data['GEAR'] != 0) {
+            this.data['RPM_UP'] = Math.round(this.data['RPM'] * (this.DIST_PER_REV_DICT[this.data['GEAR']] / this.DIST_PER_REV_DICT[this.data['GEAR'] + 1]));
+            this.data['RPM_DOWN'] = Math.round(this.data['RPM'] * (this.DIST_PER_REV_DICT[this.data['GEAR']] / this.DIST_PER_REV_DICT[this.data['GEAR'] - 1]));
         }
     }
 
