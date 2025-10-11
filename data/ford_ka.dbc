@@ -32,19 +32,19 @@ NS_ :
     SG_MUL_VAL_
 
 BS_: 
-BU_: FordKa 
-BO_ 516 Engine: 8 FordKa
-   SG_ ThrottlePosition : 1|10@0+ (0.001,0) [0|1] "" 
-   SG_ RPM : 29|10@0+ (32,0) [0|1] "RPM" 
+BU_: Vector__XXX 
+BO_ 516 Engine: 8 Vector__XXX
+   SG_ ThrottlePosition : 1|10@0+ (0.001,0) [0|1] "" Vector__XXX
+   SG_ RPM : 29|10@0+ (32,0) [0|1] "RPM" Vector__XXX
 
-BO_ 963 Brake: 8 FordKa
-   SG_ BrakePedal : 8|1@0+ (1,0) [0|1] "" 
+BO_ 963 Brake: 8 Vector__XXX
+   SG_ BrakePedal : 8|1@0+ (1,0) [0|1] "" Vector__XXX
 
-BO_ 947 Parking: 8 FordKa
-   SG_ HandBrake : 55|1@0+ (1,0) [0|1] "" 
+BO_ 947 Parking: 8 Vector__XXX
+   SG_ HandBrake : 55|1@0+ (1,0) [0|1] "" Vector__XXX
 
-BO_ 126 Steering: 8 FordKa
-   SG_ SteeringAngle : 7|16@0+ (0.005625,-180) [0|1] "deg" FordKa
+BO_ 126 Steering: 8 Vector__XXX
+   SG_ SteeringAngle : 7|16@0+ (0.005625,-180) [0|1] "deg" Vector__XXX
 
 BA_DEF_ BO_ "GenMsgBackgroundColor" STRING ;
 BA_DEF_ BO_ "GenMsgForegroundColor" STRING ;
