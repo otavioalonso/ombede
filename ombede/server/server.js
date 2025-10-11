@@ -1,10 +1,10 @@
 
 
 
-import express from 'express';
-import http from 'http';
-import { Server as SocketIO } from 'socket.io';
-import Ombede from './Ombede.js';
+const express = require('express');
+const http = require('http');
+const { Server: SocketIO } = require('socket.io');
+const Ombede = require('./Ombede.js');
 // import SerialPort from 'serialport';
 // import Readline from '@serialport/parser-readline';
 

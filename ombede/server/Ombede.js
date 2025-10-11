@@ -9,7 +9,7 @@ const AIR_DENSITY = 1.184; // g/l
 class Ombede {
     constructor(connection = null) {
         this.connection = connection;
-        this.USE_FAKE_DATA = true;
+        this.USE_FAKE_DATA = false;
         this.data = {};
         this.dataLog = [];
         if (this.USE_FAKE_DATA) {
@@ -30,7 +30,7 @@ class Ombede {
             };
         };
         this.dependencies = {
-            GEAR_RADIUS: ['SPEED', 'RPM'],
+            DIST_PER_REV: ['SPEED', 'RPM'],
             GEAR: ['DIST_PER_REV'],
             MAF_A: ['ABSOLUTE_LOAD', 'RPM'],
             MAF: ['INTAKE_PRESSURE', 'INTAKE_TEMP', 'RPM'],
@@ -97,11 +97,10 @@ class Ombede {
                 
                 this.data['RPM'] = this.data['SPEED'] / 60 * 100000 / this.DIST_PER_REV_DICT[gear] ;
 
-                console.log(this.data);
+                // console.log(this.data);
 
         } else if (this.connection) {
-            // TODO: Implement OBD connection logic
-            // this.data = ...
+            
         } else {
             console.log("No connection found. Can't get any data.");
             return;
@@ -173,4 +172,4 @@ class Ombede {
     }
 }
 
-export default Ombede;
+module.exports = Ombede;
