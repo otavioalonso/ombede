@@ -1,0 +1,172 @@
+{
+    "messages": [
+        {
+            "id": 516,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "Engine",
+            "signals": [
+                {
+                    "bit_length": 10,
+                    "factor": 0.001,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "ThrottlePosition",
+                    "offset": 0,
+                    "start_bit": 1
+                },
+                {
+                    "bit_length": 10,
+                    "factor": 32,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "RPM",
+                    "offset": 0,
+                    "start_bit": 29
+                }
+            ]
+        },
+        {
+            "id": 963,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "Brake",
+            "signals": [
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "BrakePedal",
+                    "offset": 0,
+                    "start_bit": 8
+                }
+            ]
+        },
+        {
+            "id": 947,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "Parking",
+            "signals": [
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "HandBrake",
+                    "offset": 0,
+                    "start_bit": 55
+                },
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "FrontRightDoor",
+                    "offset": 0,
+                    "start_bit": 60
+                },
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "FrontLeftDoor",
+                    "offset": 0,
+                    "start_bit": 61
+                },
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "BackLeftDoor",
+                    "offset": 0,
+                    "start_bit": 48
+                },
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "BackRightDoor",
+                    "offset": 0,
+                    "start_bit": 49
+                }
+            ]
+        },
+        {
+            "id": 126,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "Steering",
+            "signals": [
+                {
+                    "bit_length": 16,
+                    "factor": 0.005625,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "SteeringAngle",
+                    "offset": -180,
+                    "start_bit": 7
+                }
+            ]
+        },
+        {
+            "id": 76,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "Buckle",
+            "signals": [
+                {
+                    "bit_length": 2,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "BuckleDriver",
+                    "offset": -1,
+                    "start_bit": 15
+                }
+            ]
+        },
+        {
+            "id": 817,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "Lock",
+            "signals": [
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "Locked",
+                    "offset": 0,
+                    "start_bit": 33
+                },
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "Unlocked",
+                    "offset": 0,
+                    "start_bit": 32
+                }
+            ]
+        }
+    ]
+}

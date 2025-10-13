@@ -32,7 +32,7 @@ NS_ :
     SG_MUL_VAL_
 
 BS_: 
-BU_: Vector__XXX 
+BU_: 
 BO_ 516 Engine: 8 Vector__XXX
    SG_ ThrottlePosition : 1|10@0+ (0.001,0) [0|1] "" Vector__XXX
    SG_ RPM : 29|10@0+ (32,0) [0|1] "RPM" Vector__XXX
@@ -42,12 +42,31 @@ BO_ 963 Brake: 8 Vector__XXX
 
 BO_ 947 Parking: 8 Vector__XXX
    SG_ HandBrake : 55|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ FrontRightDoor : 60|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ FrontLeftDoor : 61|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ BackLeftDoor : 48|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ BackRightDoor : 49|1@0+ (1,0) [0|1] "" Vector__XXX
 
 BO_ 126 Steering: 8 Vector__XXX
    SG_ SteeringAngle : 7|16@0+ (0.005625,-180) [0|1] "deg" Vector__XXX
 
+BO_ 76 Buckle: 0 Vector__XXX
+   SG_ BuckleDriver : 15|2@0+ (1,-1) [0|1] "" Vector__XXX
+
+BO_ 817 Lock: 0 Vector__XXX
+   SG_ Locked : 33|1@0+ (1,0) [0|1] "" Vector__XXX
+   SG_ Unlocked : 32|1@0+ (1,0) [0|1] "" Vector__XXX
+
 BA_DEF_ BO_ "GenMsgBackgroundColor" STRING ;
 BA_DEF_ BO_ "GenMsgForegroundColor" STRING ;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
+BA_DEF_ BO_ "matchingcriteria" INT 0 0;
+BA_DEF_ BO_ "filterlabeling" INT 0 0;
 BA_DEF_ BO_ "matchingcriteria" INT 0 0;
 BA_DEF_ BO_ "filterlabeling" INT 0 0;
 BA_DEF_ BO_ "matchingcriteria" INT 0 0;
@@ -59,3 +78,5 @@ BA_DEF_DEF_ "GenMsgBackgroundColor" "#ffffff";
 BA_DEF_DEF_ "GenMsgForegroundColor" "#000000";
 BA_DEF_DEF_ "matchingcriteria" 0;
 BA_DEF_DEF_ "filterlabeling" 0;
+BA_DEF_DEF_ "matchingcriteria" 0;
+BA_DEF_DEF_ "filterlabeling" true;
