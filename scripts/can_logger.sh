@@ -4,12 +4,20 @@ INTERFACE="can0"
 LOGDIR="/home/ota/canlogs"
 LOGFILE="$LOGDIR/canlog_$(date +'%Y%m%d_%H%M%S').log"
 USER="ota"
+MAXSIZE=$((40 * 1024 * 1024 * 1024)) # 40GB in bytes
 
 # Create log directory if it doesn't exist
 if [ ! -d "$LOGDIR" ]; then
 	mkdir -p "$LOGDIR"
 	chown "$USER":"$USER" "$LOGDIR"
 	chmod 755 "$LOGDIR"
+fi
+	
+# Check if directory is larger than MAXSIZE
+DIRSIZE=$(du -sb "$LOGDIR" | awk '{print $1}')
+if [ "$DIRSIZE" -gt $MAXSIZE ]; then
+	echo "Log directory is larger than MAXSIZE. Skipping logging."
+	exit 0
 fi
 
 # Start logging CAN data
