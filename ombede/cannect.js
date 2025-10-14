@@ -26,51 +26,44 @@ class Parser {
                 const decoder = this.lexicon.messages.find(m => m.id === id);
                 return decoder && decoder.signals && decoder.signals.some(s => signals.includes(s.name));
             });
-        } else {
-            return this.frameIds;
-        }
+        } else return this.frameIds;
     }
 
     parseFrame(frame) {
-        // frame is a string like "frame [frame_id (HEX)] [time] 00 1A F8 00 00 00 00 00"
+        // frame is a string like "frame [frame_id(x16)] [time] 00 1A F8 00 00 00 00 00"
         const words = frame.split(' ');
-        if (words.length < 3 + FRAME_LENGTH || words[0] !== 'frame') {
+
+        if (words.length < 3 + FRAME_LENGTH || words[0] !== 'frame')
             throw new Error('Invalid frame format');
-        }
+
         const id = parseInt(words[1], 16);
 
-        if (!this.frameIds.includes(id)) {
-            return null;
-        }
+        if (!this.frameIds.includes(id)) return null;
+
         const time = parseFloat(words[2]);
         const data = words.slice(3, 3 + FRAME_LENGTH).map(b => parseInt(b, 16));
         const decoder = this.lexicon.messages.find(m => m.id === id);
 
-        if (this.debug) {
+        if (this.debug)
             console.log(`Frame ${id}: ${data.map(b => b.toString(2).padStart(8, '0')).join(' ')}`);
-        }
 
         const result = { id: id, name: decoder.name, time: time, data: {} };
         if (decoder && decoder.signals) {
             for (const signal of decoder.signals) {
-                if(!signal.is_big_endian) {
+
+                if(!signal.is_big_endian)
                     throw new Error('Little-endian signals not yet supported');
-                }
-                if(signal.signed) {
+
+                if(signal.signed)
                     throw new Error('Signed signals not yet supported');
-                }
                 
                 const start = 8*Math.floor(signal.start_bit / 8) + (7 - signal.start_bit % 8);
-                
-                let value = data.map(b  => b.toString(2).padStart(8, '0')).join('').slice(start, start + signal.bit_length);
+                const value = data.map(b  => b.toString(2).padStart(8, '0')).join('').slice(start, start + signal.bit_length);
 
-                if (this.debug) {
+                if (this.debug)
                     console.log(`${signal.name.padStart(20)}: ${value} ${parseInt(value, 2)}`);
-                }
 
-                value = parseInt(value, 2) * signal.factor + signal.offset;
-
-                result.data[signal.name] = value;
+                result.data[signal.name] = parseInt(value, 2) * signal.factor + signal.offset;
             }
         }
         return result;
@@ -94,17 +87,12 @@ class Connection {
         this.frameIds = frameIds;
         this.debug = debug;
 
-        if(parser && parser instanceof Parser) {
-            this.parser = parser;
-        } else if (typeof parser === 'string') {
-            this.parser = new Parser(parser, this.debug);
-        } else {
-            this.parser = null;
-        }
+        if(parser && parser instanceof Parser) this.parser = parser;
+        else if (typeof parser === 'string') this.parser = new Parser(parser, this.debug);
+        else this.parser = null;
 
-        if (this.parser && this.frameIds.length === 0) {
+        if (this.parser && this.frameIds.length === 0)
             this.frameIds = this.parser.getFrameIds({ signals: signals, messages: messages });
-        }
 
         this.client = net.createConnection({ host: this.host, port: this.port }, () => {
             console.log('Connected to socketcand server');
@@ -123,25 +111,19 @@ class Connection {
                     let msg = this.client._msgBuffer.substring(openIdx + 1, closeIdx).trim();
                     this.client.emit('message', msg);
                     startIdx = closeIdx + 1;
-                } else {
-                    break;
-                }
+                } else break;
             }
             // Keep any incomplete message in buffer
             this.client._msgBuffer = this.client._msgBuffer.slice(startIdx);
         });
 
         this.client.on('message', (msg) => {
-            if (this.debug) {
-                console.log('SERVER:', msg);
-            }
+            if (this.debug) console.log('SERVER:', msg);
             if (msg.startsWith('frame')) {
                 this.client.emit('frame', msg);
                 if (this.parser) {
                     const parsed = this.parser.parseFrame(msg);
-                    if (parsed) {
-                        this.client.emit('parsedFrame', parsed);
-                    }
+                    if (parsed) this.client.emit('parsedFrame', parsed);
                 }
             }
         });
@@ -152,9 +134,7 @@ class Connection {
     }
 
     sendMessage(msg) {
-        if (this.debug) {
-            console.log('CLIENT:', msg);
-        }
+        if (this.debug) console.log('CLIENT:', msg);
         this.client.write(`< ${msg} >`);
     }
 
@@ -179,11 +159,10 @@ class Connection {
     async handshake() {
         await this.sendMessageWithAck(`open ${this.channel}`, `ok`);
         console.log('CAN channel opened');
-        for (const frameId of this.frameIds) {
-            this.sendMessage(`subscribe 0 0 ${frameId.toString(16)}`);
-        }
-    }
 
+        for (const frameId of this.frameIds)
+            this.sendMessage(`subscribe 0 0 ${frameId.toString(16)}`);
+    }
 
     onParsedFrame(callback) {
         this.client.on('parsedFrame', callback);
