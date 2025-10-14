@@ -1,0 +1,14 @@
+[Unit]
+Description=CAN Bus Logging Service
+After=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre=/sbin/ip link set can0 up type can bitrate 1000000
+ExecStart=/home/ota/bin/can_logger.sh
+Restart=always
+User=root
+WorkingDirectory=/home/ota/canlogs
+
+[Install]
+WantedBy=multi-user.target
