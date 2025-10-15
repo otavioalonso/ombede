@@ -1,11 +1,11 @@
 [Unit]
 Description=SocketCAN Daemon Service
-After=network-online.target
+Requires=can-init.service
+After=can-init.service
 
 [Service]
 Type=simple
-ExecStartPre=/sbin/ip link set can0 up type can bitrate 1000000
-ExecStart=/usr/bin/socketcand -i can0 -p 29536
+ExecStart=socketcand -i can0 -p 29536
 Restart=always
 User=root
 

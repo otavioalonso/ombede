@@ -1,0 +1,9 @@
+[Unit]
+Description=CAN interface initialization
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=ip link set can0 up type can bitrate 1000000
+RemainAfterExit=yes
+User=root
