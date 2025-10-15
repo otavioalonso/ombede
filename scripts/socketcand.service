@@ -5,7 +5,7 @@ After=can-init.service
 
 [Service]
 Type=simple
-ExecStart=socketcand -i can0 -p 29536
+ExecStart=socketcand -i can0 -l wlan0 -v
 Restart=always
 User=root
 
