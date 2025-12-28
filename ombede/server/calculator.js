@@ -111,7 +111,7 @@ class KaCalculator extends BaseCalculator {
         if (typeof quantities === 'string') quantities = [quantities];
         if (quantities.includes('distancePerRevolution')) this.computeDistancePerRevolution();
         if (quantities.includes('gear')) this.computeGear();
-        if (quantities.includes('fuelEfficiency')) this.computeFuelEfficiency();
+        // if (quantities.includes('fuelEfficiency')) this.computeFuelEfficiency();
         if (quantities.includes('totalFuelConsumption')) this.computeTotalFuelConsumption();
     }
 

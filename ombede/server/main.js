@@ -25,7 +25,7 @@ const connection = new Connection({
 
 connection.connect();
 
-// Buffer data and send array every 500ms
+// Buffer data and send through websocket periodically
 let dataBuffer = [];
 
 connection.onCalculatedData((data) => {
@@ -34,7 +34,8 @@ connection.onCalculatedData((data) => {
 
 setInterval(() => {
     if (dataBuffer.length > 0) {
-        broadcast({ type: 'calculatedData', payload: dataBuffer });
+        broadcast({ type: 'canData', payload: dataBuffer });
+        // console.log(dataBuffer.at(-1));
         dataBuffer = [];
     }
 }, 500);
