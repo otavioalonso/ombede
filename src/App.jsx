@@ -23,7 +23,7 @@ function App() {
   });
 
   return (
-    <div style={{ maxWidth: 500, margin: '2rem auto', fontFamily: 'sans-serif' }}>
+  <div id="can-visualization" style={{ maxWidth: 500, margin: '2rem auto', fontFamily: 'sans-serif' }}>
       {dataPoint ? (
         <table style={{ width: '100%', borderCollapse: 'collapse', background: '#f9f9f9', borderRadius: 8, boxShadow: '0 2px 8px #0001' }}>
           <tbody>
