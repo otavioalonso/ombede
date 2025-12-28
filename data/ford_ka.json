@@ -351,6 +351,66 @@
                     "start_bit": 7
                 }
             ]
+        },
+        {
+            "id": 1084,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "Battery",
+            "signals": [
+                {
+                    "bit_length": 7,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "Charge",
+                    "offset": 0,
+                    "start_bit": 22,
+                    "unit": "%"
+                },
+                {
+                    "bit_length": 15,
+                    "factor": 0.0078125,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "DeltaCharge",
+                    "offset": -100,
+                    "start_bit": 6,
+                    "unit": "Ah"
+                },
+                {
+                    "bit_length": 7,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "Capacity",
+                    "offset": 0,
+                    "start_bit": 38,
+                    "unit": "Ah"
+                }
+            ]
+        },
+        {
+            "id": 578,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "BodyControlModule",
+            "signals": [
+                {
+                    "bit_length": 8,
+                    "factor": 0.0625,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "BatteryVoltage",
+                    "offset": 0,
+                    "start_bit": 39,
+                    "unit": "V"
+                }
+            ]
         }
     ]
 }
