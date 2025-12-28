@@ -95,6 +95,7 @@ class KaCalculator extends BaseCalculator {
             distancePerRevolution: ['speed', 'rpm'],
             gear: ['distancePerRevolution'],
             fuelEfficiency: ['speed', 'fuelFlow'],
+            totalFuelConsumption: ['fuelConsumption']
         };
         this.distancePerRevolutionDict = {
             0: 0.0,
@@ -123,6 +124,10 @@ class KaCalculator extends BaseCalculator {
     computeGear() {
         let diff = 0.05;
         this.data['gear'] = 0;
+        if (this.data['speed'] < 1) {
+            this.data['gear'] = 0;
+            return;
+        }
         for (const k in this.distancePerRevolutionDict) {
             const newDiff = Math.abs(this.distancePerRevolutionDict[k] - this.data['distancePerRevolution'])/this.distancePerRevolutionDict[k] - 1;
             if (newDiff < diff) {
@@ -143,7 +148,8 @@ class KaCalculator extends BaseCalculator {
             this.data['fuelConsumptionCycles'] = (this.data['fuelConsumptionCycles'] || 0) + 1;
         }
         
-        this.data['totalFuelConsumption'] = this.data['fuelConsumption'] + (this.data['fuelConsumptionCycles'] || 0) * 25575;
+        this.data['totalFuelConsumption'] = this.data['fuelConsumption'] + (this.data['fuelConsumptionCycles'] || 0) * 25.575;
+        this.data['previousFuelConsumption'] = this.data['fuelConsumption'];
     }
 }
 
