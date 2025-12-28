@@ -16,7 +16,7 @@ function broadcast(data) {
 }
 
 const connection = new Connection({
-    host: '192.168.1.111',
+    host: 'localhost',
     parser: './can/ford_ka.json',
     signals: ['rpm', 'speed', 'batteryCharge', 'fuelConsumption', 'odometer'],
     calculator: new KaCalculator(),
