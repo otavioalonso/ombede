@@ -259,21 +259,10 @@
                     "is_big_endian": true,
                     "is_float": false,
                     "is_signed": false,
-                    "name": "fuelFlow",
+                    "name": "fuelConsumption",
                     "offset": 0,
-                    "start_bit": 45,
-                    "unit": "mL/s"
-                },
-                {
-                    "bit_length": 8,
-                    "factor": 0.2,
-                    "is_big_endian": true,
-                    "is_float": false,
-                    "is_signed": false,
-                    "name": "odometer",
-                    "offset": 0,
-                    "start_bit": 47,
-                    "unit": "km"
+                    "start_bit": 49,
+                    "unit": "mL"
                 }
             ]
         },
@@ -293,6 +282,25 @@
                     "offset": -5.217408,
                     "start_bit": 1,
                     "unit": "%"
+                }
+            ]
+        },
+        {
+            "id": 1072,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "Info",
+            "signals": [
+                {
+                    "bit_length": 24,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "odometer",
+                    "offset": 0,
+                    "start_bit": 15,
+                    "unit": "km"
                 }
             ]
         },
@@ -364,7 +372,7 @@
                     "is_big_endian": true,
                     "is_float": false,
                     "is_signed": false,
-                    "name": "charge",
+                    "name": "batteryCharge",
                     "offset": 0,
                     "start_bit": 22,
                     "unit": "%"
@@ -375,7 +383,7 @@
                     "is_big_endian": true,
                     "is_float": false,
                     "is_signed": false,
-                    "name": "deltaCharge",
+                    "name": "deltaBatteryCharge",
                     "offset": -100,
                     "start_bit": 6,
                     "unit": "Ah"
@@ -386,7 +394,7 @@
                     "is_big_endian": true,
                     "is_float": false,
                     "is_signed": false,
-                    "name": "capacity",
+                    "name": "batteryCapacity",
                     "offset": 0,
                     "start_bit": 38,
                     "unit": "Ah"

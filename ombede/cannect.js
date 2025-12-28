@@ -2,6 +2,8 @@
 import net from 'net';
 import fs from 'fs';
 
+import {BaseCalculator} from './calculator.js';
+
 // Protocol reference:
 // https://github.com/dschanoeh/socketcand/blob/master/doc/protocol.md
 
@@ -70,6 +72,7 @@ class Parser {
     }
 }
 
+
 class Connection {
     constructor({
         host = 'localhost',
@@ -79,6 +82,7 @@ class Connection {
         signals = [],
         messages = [],
         parser = null,
+        calculator = null,
         debug = true
     } = {}) {
         this.host = host;
@@ -94,6 +98,11 @@ class Connection {
         if (this.parser && this.frameIds.length === 0)
             this.frameIds = this.parser.getFrameIds({ signals: signals, messages: messages });
 
+        if (calculator && calculator instanceof BaseCalculator) this.calculator = calculator;
+        else this.calculator = null;
+    }
+
+    connect() {
         this.client = net.createConnection({ host: this.host, port: this.port }, () => {
             console.log('Connected to socketcand server');
             this.handshake();
@@ -123,7 +132,13 @@ class Connection {
                 this.client.emit('frame', msg);
                 if (this.parser) {
                     const parsed = this.parser.parseFrame(msg);
-                    if (parsed) this.client.emit('parsedFrame', parsed);
+                    if (parsed && this.frameIds.includes(parsed.id)) {
+                        this.client.emit('parsedFrame', parsed);
+                        if (this.calculator) {
+                            const result = this.calculator.update(parsed.data);
+                            if (result) this.client.emit('calculatedData', result);
+                        }
+                    }
                 }
             }
         });
@@ -162,6 +177,10 @@ class Connection {
 
         for (const frameId of this.frameIds)
             this.sendMessage(`subscribe 0 0 ${frameId.toString(16)}`);
+    }
+
+    onCalculatedData(callback) {
+        this.client.on('calculatedData', callback);
     }
 
     onParsedFrame(callback) {

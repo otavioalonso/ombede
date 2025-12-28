@@ -1,39 +1,14 @@
-// Node.js implementation of the Ombede system
-// Handles quantities, dependencies, and computation logic
 
-const MolarMassAir = 28.97; // g/mol
-const GasConstant = 8.3144598; // J/(K*mol)
-const FuelDensity = 0.737; // g/ml
-const AirDensity = 1.184; // g/l
+const MAX_DATA_LOG_LENGTH = 10000;
 
-class calculator {
+class BaseCalculator {
     constructor() {
         this.data = {};
         this.dataLog = [];
-        this.dependencies = {
-            DistPerRev: ['Speed', 'RPM'],
-            Gear: ['DistPerRev'],
-            MAF_A: ['AbsoluteLoad', 'RPM'],
-            MAF: ['IntakePressure', 'IntakeTemp', 'RPM'],
-            AFR: ['CommandedEquivRatio', 'EthanolPercent'],
-            FuelFlow: ['AFR', 'MAF'],
-            FuelEfficiency: ['Speed', 'FuelFlow'],
-        };
-
-        this.DistPerRevDict = {
-            0: 0.0,
-            1: 10.0,
-            2: 18.0,
-            3: 28.5,
-            4: 40.0,
-            5: 50.0,
-        };
-
-        this.EngineDisplacement = 1.0; // liters
-        this.VolumetricEfficiency = 0.75;
+        this.dependencies = {};
     }
 
-    // Recursively resolve dependencies
+    // Recursively solve dependencies
     _solveDependencies(quant, level = Infinity) {
         if (this.dependencies[quant] && level > 0) {
             return this.dependencies[quant].map(dep =>
@@ -57,20 +32,34 @@ class calculator {
 
     // Get unique flat list of dependencies
     getDependencies(quantities, level = Infinity) {
+        if (typeof quantities === 'string') quantities = [quantities];
         const deps = quantities.map(q => this._solveDependencies(q, level));
         return [...new Set(this._flatten(deps))];
     }
 
+    // Get all quantities that depend on given quantities
+    getDependents(quantities) {
+        const dependents = new Set();
+        const stack = (typeof quantities === 'string') ? [quantities] : quantities;
+        for (const [key, deps] of Object.entries(this.dependencies)) {
+            for (const dep of this.getDependencies(deps)) {
+                if (stack.includes(dep)) dependents.add(key);
+            }
+        }
+        return Array.from(dependents);
+    }
+
     // Request quantities and compute them
     request(quantities) {
-        this.data['Time'] = Date.now();
         if (typeof quantities === 'string') quantities = [quantities];
-        // this.data[...] = ...
         try {
             for (let level = 3; level >= 0; level--) {
                 this.computeQuantities(this.getDependencies(quantities, level));
             }
             this.dataLog.push({ ...this.data });
+            if (this.dataLog.length > MAX_DATA_LOG_LENGTH) {
+                this.dataLog.shift();
+            }
             return Object.fromEntries(
                 quantities.map(k => [k, this.data[k]])
             );
@@ -80,57 +69,82 @@ class calculator {
         }
     }
 
-    // Compute derived quantities
-    computeQuantities(quantities) {
-        if (quantities.includes('DistPerRev')) this.computeDistPerRev();
-        if (quantities.includes('Gear')) this.computeGear();
-        if (quantities.includes('MAFA')) this.computeMAFA();
-        if (quantities.includes('MAF')) this.computeMAF();
-        if (quantities.includes('AFR')) this.computeAFR();
-        if (quantities.includes('FuelFlow')) this.computeFuelFlow();
-        if (quantities.includes('FuelEfficiency')) this.computeFuelEfficiency();
+    update(data, quantities = null) {
+        if (quantities == null) {
+            quantities = Object.keys(data);
+        }
+        this.data = { ...this.data, ...data };
+        this.computeQuantities(this.getDependents(quantities));
+        this.dataLog.push({ ...this.data });
+        if (this.dataLog.length > MAX_DATA_LOG_LENGTH) {
+            this.dataLog.shift();
+        }
+        return this.data;
     }
 
-    computeDistPerRev() {
-    // Assume Speed in km/h, RPM in 1/min, output in cm
-    this.data['DistPerRev'] = this.data['Speed'] / 60 * 100000 / this.data['RPM'];
+    // To be implemented by subclass
+    computeQuantities(quantities) {
+        throw new Error('computeQuantities must be implemented by subclass');
+    }
+}
+
+class KaCalculator extends BaseCalculator {
+    constructor() {
+        super();
+        this.dependencies = {
+            distancePerRevolution: ['speed', 'rpm'],
+            gear: ['distancePerRevolution'],
+            fuelEfficiency: ['speed', 'fuelFlow'],
+        };
+        this.distancePerRevolutionDict = {
+            0: 0.0,
+            1: 10.0,
+            2: 18.0,
+            3: 28.5,
+            4: 40.0,
+            5: 50.0,
+        };
+    }
+
+    // Compute derived quantities
+    computeQuantities(quantities) {
+        if (typeof quantities === 'string') quantities = [quantities];
+        if (quantities.includes('distancePerRevolution')) this.computeDistancePerRevolution();
+        if (quantities.includes('gear')) this.computeGear();
+        if (quantities.includes('fuelEfficiency')) this.computeFuelEfficiency();
+        if (quantities.includes('totalFuelConsumption')) this.computeTotalFuelConsumption();
+    }
+
+    computeDistancePerRevolution() {
+        // Assume speed in km/h, RPM in 1/min, output in cm
+        this.data['distancePerRevolution'] = this.data['speed'] / 60 * 100000 / this.data['rpm'];
     }
 
     computeGear() {
         let diff = 0.05;
-        this.data['Gear'] = 0;
-        for (const k in this.DistPerRevDict) {
-            const newDiff = Math.abs(this.DistPerRevDict[k] - this.data['DistPerRev'])/this.DistPerRevDict[k] - 1;
+        this.data['gear'] = 0;
+        for (const k in this.distancePerRevolutionDict) {
+            const newDiff = Math.abs(this.distancePerRevolutionDict[k] - this.data['distancePerRevolution'])/this.distancePerRevolutionDict[k] - 1;
             if (newDiff < diff) {
                 diff = newDiff;
-                this.data['Gear'] = Number(k);
+                this.data['gear'] = Number(k);
             }
         }
-        if (this.data['Gear'] != 0) {
-            this.data['RPMUp'] = Math.round(this.data['RPM'] * (this.DistPerRevDict[this.data['Gear']] / this.DistPerRevDict[this.data['Gear'] + 1]));
-            this.data['RPMDown'] = Math.round(this.data['RPM'] * (this.DistPerRevDict[this.data['Gear']] / this.DistPerRevDict[this.data['Gear'] - 1]));
+        if (this.data['gear'] != 0) {
+            this.data['rpmUp'] = Math.round(this.data['rpm'] * (this.distancePerRevolutionDict[this.data['gear']] / this.distancePerRevolutionDict[this.data['gear'] + 1]));
+            this.data['rpmDown'] = Math.round(this.data['rpm'] * (this.distancePerRevolutionDict[this.data['gear']] / this.distancePerRevolutionDict[this.data['gear'] - 1]));
         }
     }
+    // fuelConsumption resets to zero once it reaches 25575. We have to make sure totalFuelConsumption is ever increasing.
+    computeTotalFuelConsumption() {
+        this.data['previousFuelConsumption'] = this.data['previousFuelConsumption'] || 0;
 
-    computeMAFA() {
-        this.data['MAFA'] = AirDensity * this.EngineDisplacement * this.data['AbsoluteLoad'] * (this.data['RPM']/60/2); // g/s
-    }
-    
-    computeMAF() {
-        this.data['MAF'] = (this.data['IntakePressure']*1000 / (this.data['IntakeTemp'] + 273.15) * (MolarMassAir / GasConstant) * (this.data['RPM']/60/2) * (this.EngineDisplacement / 1000) * this.VolumetricEfficiency);
-    }
-
-    computeAFR() {
-        this.data['AFR'] = (14.7 + (9.0 - 14.7) * (this.data['EthanolPercent']/100.0)) * this.data['CommandedEquivRatio'];
-    }
-
-    computeFuelFlow() {
-        this.data['FuelFlow'] = this.data['MAF'] / this.data['AFR'] / FuelDensity; // ml/s
-    }
-
-    computeFuelEfficiency() {
-        this.data['FuelEfficiency'] = this.data['Speed'] / this.data['FuelFlow'] / 3.6; // km/l
+        if (this.data['fuelConsumption'] < this.data['previousFuelConsumption']) {
+            this.data['fuelConsumptionCycles'] = (this.data['fuelConsumptionCycles'] || 0) + 1;
+        }
+        
+        this.data['totalFuelConsumption'] = this.data['fuelConsumption'] + (this.data['fuelConsumptionCycles'] || 0) * 25575;
     }
 }
 
-module.exports = calculator;
+export { BaseCalculator, KaCalculator };
