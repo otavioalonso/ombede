@@ -135,7 +135,7 @@ class Connection {
                     if (parsed && this.frameIds.includes(parsed.id)) {
                         this.client.emit('parsedFrame', parsed);
                         if (this.calculator) {
-                            const result = this.calculator.update(parsed.data);
+                            const result = this.calculator.update((d => ({time: d.time, ...d.data}))(parsed));
                             if (result) this.client.emit('calculatedData', result);
                         }
                     }
