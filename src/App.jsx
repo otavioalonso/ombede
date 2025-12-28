@@ -23,7 +23,7 @@ function App() {
   });
 
   return (
-  <div id="can-visualization" style={{ maxWidth: 500, margin: '2rem auto', fontFamily: 'sans-serif' }}>
+    <div id="can-visualization" style={{ width: '80vw', height: '90vh', margin: 0, padding: 0, fontFamily: 'sans-serif' }}>
       {dataPoint ? (
         <table style={{ width: '100%', borderCollapse: 'collapse', background: '#f9f9f9', borderRadius: 8, boxShadow: '0 2px 8px #0001' }}>
           <tbody>
@@ -44,7 +44,7 @@ function App() {
             <tr><td>RPM</td><td>{`${dataPoint.rpm ?? 'N/A'}`}</td></tr>
             <tr><td>Throttle Position</td><td>{`${dataPoint.throttlePosition ?? 'N/A'}`}</td></tr>
             <tr><td>Gear</td><td>{`${dataPoint.gear ?? 'N/A'}`}</td></tr>
-            <tr><td>Fuel Consumption</td><td>{`${dataPoint.fuelConsumption ? `${dataPoint.fuelConsumption} mL` : 'N/A'}`}</td></tr>
+            <tr><td>Fuel Consumption</td><td>{`${dataPoint.fuelConsumption ? `${dataPoint.fuelConsumption.toFixed(3)} mL` : 'N/A'}`}</td></tr>
             <tr><td>Odometer</td><td>{`${dataPoint.odometer ?? 'N/A'} km`}</td></tr>
             <tr><td>Distance/Rev</td><td>{`${dataPoint.distancePerRevolution ?? 'N/A'}`}</td></tr>
             <tr><td>Reverse</td><td>{dataPoint.reverse ? 'Yes' : 'No'}</td></tr>
