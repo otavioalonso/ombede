@@ -1,9 +1,9 @@
 #!/bin/bash
 
 INTERFACE="can0"
-LOGDIR="/home/ota/canlogs"
+USER=$USER
+LOGDIR="/home/$USER/canlogs"
 LOGFILE="$LOGDIR/canlog_$(date +'%Y%m%d_%H%M%S').log"
-USER="ota"
 MAXSIZE=$((40 * 1024 * 1024 * 1024)) # 40GB in bytes
 
 # Create log directory if it doesn't exist
