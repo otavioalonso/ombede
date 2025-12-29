@@ -95,7 +95,8 @@ class KaCalculator extends BaseCalculator {
             distancePerRevolution: ['speed', 'rpm'],
             gear: ['distancePerRevolution'],
             fuelEfficiency: ['speed', 'fuelFlow'],
-            totalFuelConsumption: ['fuelConsumption']
+            totalFuelConsumption: ['fuelConsumption'],
+            fuelFlow: ['fuelConsumption', 'time']
         };
         this.distancePerRevolutionDict = {
             0: 0.0,
@@ -112,8 +113,8 @@ class KaCalculator extends BaseCalculator {
         if (typeof quantities === 'string') quantities = [quantities];
         if (quantities.includes('distancePerRevolution')) this.computeDistancePerRevolution();
         if (quantities.includes('gear')) this.computeGear();
-        // if (quantities.includes('fuelEfficiency')) this.computeFuelEfficiency();
-        if (quantities.includes('totalFuelConsumption')) this.computeTotalFuelConsumption();
+        if (quantities.includes('totalFuelConsumption') || quantities.includes('fuelFlow')) this.computeFuelConsumption();
+        if (quantities.includes('fuelEfficiency')) this.computeFuelEfficiency();
     }
 
     computeDistancePerRevolution() {
@@ -141,16 +142,33 @@ class KaCalculator extends BaseCalculator {
         }
     }
     // fuelConsumption resets to zero once it reaches 25575. We have to make sure totalFuelConsumption is ever increasing.
-    computeTotalFuelConsumption() {
+    computeFuelConsumption() {
+        if (!this.data['previousTime']) {
+            this.data['previousTime'] = this.data['time'];
+            return;
+        }
         this.data['previousFuelConsumption'] = this.data['previousFuelConsumption'] || 0;
 
         if (this.data['fuelConsumption'] < this.data['previousFuelConsumption']) {
             this.data['fuelConsumptionCycles'] = (this.data['fuelConsumptionCycles'] || 0) + 1;
+            this.data['fuelFlow'] = (25.575 + this.data['fuelConsumption'] - this.data['previousFuelConsumption']) / (this.data['time'] - this.data['previousTime']);
+        } else {
+            this.data['fuelFlow'] = (this.data['fuelConsumption'] - this.data['previousFuelConsumption']) / (this.data['time'] - this.data['previousTime']);
         }
         
         this.data['totalFuelConsumption'] = this.data['fuelConsumption'] + (this.data['fuelConsumptionCycles'] || 0) * 25.575;
+        
         this.data['previousFuelConsumption'] = this.data['fuelConsumption'];
     }
+
+    computeFuelEfficiency() {
+        if (!this.data['fuelFlow'] || !this.data['speed']) {
+            this.data['fuelEfficiency'] = 0;
+        } else {
+            this.data['fuelEfficiency'] = this.data['fuelFlow'] / this.data['speed'];
+        }
+    }
+
 }
 
 export { BaseCalculator, KaCalculator };
