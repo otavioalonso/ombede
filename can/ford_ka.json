@@ -1,0 +1,424 @@
+{
+    "messages": [
+        {
+            "id": 516,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "engine",
+            "signals": [
+                {
+                    "bit_length": 10,
+                    "factor": 0.1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "throttlePosition",
+                    "offset": 0,
+                    "start_bit": 1,
+                    "unit": "%"
+                },
+                {
+                    "bit_length": 10,
+                    "factor": 32,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "rpm",
+                    "offset": 0,
+                    "start_bit": 29
+                }
+            ]
+        },
+        {
+            "id": 963,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "lights",
+            "signals": [
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "brakeLight",
+                    "offset": 0,
+                    "start_bit": 8
+                }
+            ]
+        },
+        {
+            "id": 947,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "bodyInfo",
+            "signals": [
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "parkingBrake",
+                    "offset": 0,
+                    "start_bit": 55
+                },
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "frontRightDoor",
+                    "offset": 0,
+                    "start_bit": 60
+                },
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "frontLeftDoor",
+                    "offset": 0,
+                    "start_bit": 61
+                },
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "backLeftDoor",
+                    "offset": 0,
+                    "start_bit": 48
+                },
+                {
+                    "bit_length": 1,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "backRightDoor",
+                    "offset": 0,
+                    "start_bit": 49
+                }
+            ]
+        },
+        {
+            "id": 126,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "steering",
+            "signals": [
+                {
+                    "bit_length": 16,
+                    "factor": 0.005625,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "steeringAngle",
+                    "offset": -180,
+                    "start_bit": 7,
+                    "unit": "deg"
+                }
+            ]
+        },
+        {
+            "id": 76,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "buckle",
+            "signals": [
+                {
+                    "bit_length": 2,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "buckleDriver",
+                    "offset": 0,
+                    "start_bit": 15,
+                    "states": [
+                        {
+                            "name": "faulty",
+                            "value": 0
+                        },
+                        {
+                            "name": "buckled",
+                            "value": 1
+                        },
+                        {
+                            "name": "unbuckled",
+                            "value": 2
+                        },
+                        {
+                            "name": "unknown",
+                            "value": 3
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 817,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "lock",
+            "signals": [
+                {
+                    "bit_length": 2,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "lock",
+                    "offset": 0,
+                    "start_bit": 34,
+                    "states": [
+                        {
+                            "name": "doubleLocked",
+                            "value": 0
+                        },
+                        {
+                            "name": "locked",
+                            "value": 1
+                        },
+                        {
+                            "name": "unlocked",
+                            "value": 2
+                        },
+                        {
+                            "name": "driverUnlocked",
+                            "value": 2
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 514,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "engine",
+            "signals": [
+                {
+                    "bit_length": 16,
+                    "factor": 0.01,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "speed",
+                    "offset": 0,
+                    "start_bit": 55,
+                    "unit": "km/h"
+                },
+                {
+                    "bit_length": 3,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "reverse",
+                    "offset": 0,
+                    "start_bit": 4,
+                    "states": [
+                        {
+                            "name": "inactiveNotConfirmed",
+                            "value": 0
+                        },
+                        {
+                            "name": "inactiveConfirmed",
+                            "value": 1
+                        },
+                        {
+                            "name": "activeNotConfirmed",
+                            "value": 2
+                        },
+                        {
+                            "name": "activeConfirmed",
+                            "value": 3
+                        },
+                        {
+                            "name": "fault",
+                            "value": 7
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": 377,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "fuelConsumption",
+            "signals": [
+                {
+                    "bit_length": 10,
+                    "factor": 0.025,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "fuelConsumption",
+                    "offset": 0,
+                    "start_bit": 49,
+                    "unit": "mL"
+                }
+            ]
+        },
+        {
+            "id": 1076,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "fuelLevel",
+            "signals": [
+                {
+                    "bit_length": 10,
+                    "factor": 0.108696,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "fuelLevel",
+                    "offset": -5.217408,
+                    "start_bit": 1,
+                    "unit": "%"
+                }
+            ]
+        },
+        {
+            "id": 1072,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "Info",
+            "signals": [
+                {
+                    "bit_length": 24,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "odometer",
+                    "offset": 0,
+                    "start_bit": 15,
+                    "unit": "km"
+                }
+            ]
+        },
+        {
+            "id": 1057,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "engine",
+            "signals": [
+                {
+                    "bit_length": 8,
+                    "factor": 0.3937,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "fuelEthanolFraction",
+                    "offset": 0,
+                    "start_bit": 63,
+                    "unit": "%"
+                }
+            ]
+        },
+        {
+            "id": 376,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "climate",
+            "signals": [
+                {
+                    "bit_length": 10,
+                    "factor": 0.25,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "ambientTemperature",
+                    "offset": -128,
+                    "start_bit": 33,
+                    "unit": "°C"
+                }
+            ]
+        },
+        {
+            "id": 938,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "parkingAid",
+            "signals": [
+                {
+                    "bit_length": 4,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "proximitySensor",
+                    "offset": 0,
+                    "start_bit": 7
+                }
+            ]
+        },
+        {
+            "id": 1084,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "battery",
+            "signals": [
+                {
+                    "bit_length": 7,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "batteryCharge",
+                    "offset": 0,
+                    "start_bit": 22,
+                    "unit": "%"
+                },
+                {
+                    "bit_length": 15,
+                    "factor": 0.0078125,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "deltaBatteryCharge",
+                    "offset": -100,
+                    "start_bit": 6,
+                    "unit": "Ah"
+                },
+                {
+                    "bit_length": 7,
+                    "factor": 1,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "batteryCapacity",
+                    "offset": 0,
+                    "start_bit": 38,
+                    "unit": "Ah"
+                }
+            ]
+        },
+        {
+            "id": 578,
+            "is_extended_frame": false,
+            "is_fd": false,
+            "name": "bodyControlModule",
+            "signals": [
+                {
+                    "bit_length": 8,
+                    "factor": 0.0625,
+                    "is_big_endian": true,
+                    "is_float": false,
+                    "is_signed": false,
+                    "name": "batteryVoltage",
+                    "offset": 0,
+                    "start_bit": 39,
+                    "unit": "V"
+                }
+            ]
+        }
+    ]
+}

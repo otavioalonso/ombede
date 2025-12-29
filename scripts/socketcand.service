@@ -1,0 +1,13 @@
+[Unit]
+Description=SocketCAN Daemon Service
+Requires=can-init.service
+After=can-init.service
+
+[Service]
+Type=simple
+ExecStart=socketcand -i can0 -l wlan0 -v
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target

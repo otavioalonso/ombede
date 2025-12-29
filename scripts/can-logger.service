@@ -1,0 +1,14 @@
+[Unit]
+Description=CAN Bus Logging Service
+Requires=can-init.service
+After=can-init.service
+
+[Service]
+Type=simple
+ExecStart=/home/ota/bin/can_logger.sh
+Restart=always
+User=root
+WorkingDirectory=/home/ota/canlogs
+
+[Install]
+WantedBy=multi-user.target
