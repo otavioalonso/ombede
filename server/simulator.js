@@ -1,12 +1,13 @@
-// sim.js: Fake CAN data generator for socketcand protocol
-// Usage: node server/sim.js [--port 29536] [--lexicon ./can/ford_ka.json]
+// simulator.js: Fake CAN data generator for socketcand protocol
+// Usage: node server/simulator.js
 
 import net from 'net';
 import fs from 'fs';
 
-const PORT = parseInt(process.env.SIM_PORT) || parseInt(process.argv[2]) || 29536;
-const LEXICON = process.env.SIM_LEXICON || process.argv[3] || './can/ford_ka.json';
+const PORT = parseInt(process.env.SIM_PORT) || 29536;
+const LEXICON = process.env.SIM_LEXICON || './can/ford_ka.json';
 const FRAME_LENGTH = 8;
+const DEBUG = process.env.SIM_DEBUG === 'true';
 
 // Load lexicon
 const lexicon = JSON.parse(fs.readFileSync(LEXICON, 'utf8'));
@@ -83,6 +84,7 @@ const server = net.createServer((socket) => {
             const data = randomFrame(message);
             const frame = formatFrame(message, data);
             socket.write('<' + frame + '>\n');
+            if (DEBUG) console.log(frame);
         }
     }, 100);
     socket.on('close', () => clearInterval(interval));
