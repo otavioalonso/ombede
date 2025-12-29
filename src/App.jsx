@@ -45,9 +45,7 @@ function App() {
             <tr><td>Gear</td><td>{`${dataPoint.gear ?? 'N/A'}`}</td></tr>
             <tr><td>Fuel Consumption</td><td>{`${dataPoint.totalFuelConsumption ? `${dataPoint.totalFuelConsumption.toFixed(0)} mL` : 'N/A'}`}</td></tr>
             <tr><td>Odometer</td><td>{`${dataPoint.odometer ?? 'N/A'} km`}</td></tr>
-            <tr><td>Throttle Position</td><td>{`${dataPoint.throttlePosition.toFixed(2) ?? 'N/A'}`}</td></tr>
-            <tr><td>Distance/Rev</td><td>{`${dataPoint.distancePerRevolution ?? 'N/A'}`}</td></tr>
-            <tr><td>Reverse</td><td>{dataPoint.reverse == 2 ? 'Yes' : 'No'}</td></tr>
+            <tr><td>Throttle Position</td><td>{`${dataPoint.throttlePosition.toFixed(0) ?? 'N/A'}`}</td></tr>
             <tr><td>Battery Level</td><td>{`${dataPoint.batteryCharge ? `${dataPoint.batteryCharge}%` : 'N/A'}`}</td></tr>
             <tr><td>Battery Charged</td><td>{`${dataPoint.deltaBatteryCharge ? `${dataPoint.deltaBatteryCharge.toFixed(3)} Ah` : 'N/A'}`}</td></tr>
             <tr><td>Battery Capacity</td><td>{`${dataPoint.batteryCapacity ? `${dataPoint.batteryCapacity} Ah` : 'N/A'}`}</td></tr>
