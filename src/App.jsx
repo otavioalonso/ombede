@@ -25,7 +25,7 @@ function App() {
   return (
     <div id="can-visualization" style={{ width: '80vw', height: '90vh', margin: 0, padding: 0, fontFamily: 'sans-serif' }}>
       {dataPoint ? (
-        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#f9f9f9', borderRadius: 8, boxShadow: '0 2px 8px #0001' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#120776ff', borderRadius: 8, boxShadow: '0 2px 8px #0001' }}>
           <tbody>
             <tr>
               <td colSpan={2} style={{fontWeight: 'bold'}}>{
