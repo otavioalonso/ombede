@@ -58,7 +58,7 @@ function App() {
           color: '#fff',
           padding: '1.2rem 2rem',
           borderRadius: 12,
-          fontSize: 18,
+          fontSize: 40 ,
           fontFamily: 'monospace',
           boxShadow: '0 2px 12px #0008',
         }}>
@@ -67,7 +67,6 @@ function App() {
           <div><b>screen.width:</b> {overlayInfo.screenWidth}</div>
           <div><b>screen.height:</b> {overlayInfo.screenHeight}</div>
           <div><b>devicePixelRatio:</b> {overlayInfo.devicePixelRatio}</div>
-          <div style={{marginTop: 8, fontSize: 14, color: '#b0bec5'}}>This overlay will disappear in 30 seconds.</div>
         </div>
       )}
       <main className="can-dashboard-main">
