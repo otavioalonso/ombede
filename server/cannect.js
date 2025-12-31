@@ -9,9 +9,12 @@ import {BaseCalculator} from './calculator.js';
 
 const FRAME_LENGTH = 8; // bytes
 
+const LOG_FLUSH_INTERVAL = 1000; // ms
+const LOG_BUFFER_MAXSIZE = 100;
+
 class Parser {
-    constructor(lexicon_file, debug = false) {
-        this.lexicon = JSON.parse(fs.readFileSync(lexicon_file, 'utf8'));
+    constructor(lexiconFile, debug = false) {
+        this.lexicon = JSON.parse(fs.readFileSync(lexiconFile, 'utf8'));
         this.frameIds = this.lexicon.messages.map(m => m.id);
         this.debug = debug;
     }
@@ -83,13 +86,16 @@ class Connection {
         messages = [],
         parser = null,
         calculator = null,
-        debug = true
+        debug = true,
+        logFile = null
     } = {}) {
         this.host = host;
         this.port = port;
         this.channel = channel;
         this.frameIds = frameIds;
         this.debug = debug;
+        this.logFile = logFile;
+        this.logBuffer = [];
 
         if(parser && parser instanceof Parser) this.parser = parser;
         else if (typeof parser === 'string') this.parser = new Parser(parser, this.debug);
@@ -134,6 +140,12 @@ class Connection {
                     const parsed = this.parser.parseFrame(msg);
                     if (parsed && this.frameIds.includes(parsed.id)) {
                         this.client.emit('parsedFrame', parsed);
+                        if (this.logFile) {
+                            this.logBuffer.push(msg);
+                            if (this.logBuffer.length >= LOG_BUFFER_MAXSIZE) {
+                                this.flushLogBuffer();
+                            }
+                        }
                         if (this.calculator) {
                             const result = this.calculator.update((d => ({time: d.time, ...d.data}))(parsed));
                             if (result) this.client.emit('calculatedData', result);
@@ -146,6 +158,17 @@ class Connection {
         this.client.on('end', () => {
             console.log('Disconnected from socketcand server');
         });
+
+        if (this.logFile) {
+            this._logFlushTimer = setInterval(() => this.flushLogBuffer(), LOG_FLUSH_INTERVAL);
+        }
+    }
+
+    flushLogBuffer() {
+        if (this.logFile && this.logBuffer && this.logBuffer.length > 0) {
+            fs.appendFileSync(this.logFile, this.logBuffer.join('\n') + '\n');
+            this.logBuffer = [];
+        }
     }
 
     sendMessage(msg) {
@@ -192,6 +215,11 @@ class Connection {
     }
 
     close() {
+        if (this._logFlushTimer) {
+            clearInterval(this._logFlushTimer);
+            this._logFlushTimer = null;
+        }
+        this.flushLogBuffer();
         this.sendMessageWithAck(`close ${this.channel}`, `ok`).then(() => {
             console.log('CAN channel closed');
             this.client.end();
