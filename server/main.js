@@ -18,7 +18,7 @@ function broadcast(data) {
 const connection = new Connection({
     host: 'localhost',
     parser: './can/ford_ka.json',
-    signals: ['rpm', 'speed', 'batteryCharge', 'fuelConsumption', 'odometer'],
+    signals: ['rpm', 'speed', 'batteryCharge', 'fuelLevel', 'fuelConsumption', 'odometer', 'steeringAngle'],
     calculator: new KaCalculator(),
     debug: false,
     logFile: './can.log'

@@ -40,15 +40,14 @@ function App() {
                 })()
               }</td>
             </tr>
-            <tr><td>Speed</td><td>{`${dataPoint.speed ? `${dataPoint.speed.toFixed(0)} km/h` : 'N/A'}`}</td></tr>
-            <tr><td>RPM</td><td>{`${dataPoint.rpm ?? 'N/A'}`}</td></tr>
-            <tr><td>Gear</td><td>{`${dataPoint.gear ?? 'N/A'}`}</td></tr>
-            <tr><td>Fuel Consumption</td><td>{`${dataPoint.totalFuelConsumption ? `${dataPoint.totalFuelConsumption.toFixed(0)} mL` : 'N/A'}`}</td></tr>
+            <tr><td>{`${dataPoint.gear ? `Gear ${dataPoint.gear}` : 'N/A'}`}</td><td>{`${dataPoint.rpm ? `${dataPoint.rpm.toFixed(0)} RPM` : 'N/A'}`}</td></tr>
+            <tr><td>{`${dataPoint.rpmDown ? `${dataPoint.rpmDown} DOWN` : 'N/A'}`}</td><td>{`${dataPoint.rpmUp ? `${dataPoint.rpmUp} UP` : 'N/A'}`}</td></tr>
+            <tr><td>{`${dataPoint.speed ? `${dataPoint.speed.toFixed(0)} km/h` : 'N/A'}`}</td><td>{`${dataPoint.steeringAngle ? `${dataPoint.steeringAngle.toFixed(0)}°` : 'N/A'}`}</td></tr>
+            <tr><td>Tank</td><td>{`${dataPoint.fuelLevel ? `${(dataPoint.fuelLevel * 51/100).toFixed(1)} L` : 'N/A'}`}</td></tr>
+            <tr><td>Injected</td><td>{`${dataPoint.totalFuelConsumption ? `${dataPoint.totalFuelConsumption.toFixed(0)} mL` : 'N/A'}`}</td></tr>
             <tr><td>Odometer</td><td>{`${dataPoint.odometer ?? 'N/A'} km`}</td></tr>
-            <tr><td>Throttle Position</td><td>{`${dataPoint.throttlePosition.toFixed(0) ?? 'N/A'}`}</td></tr>
-            <tr><td>Battery Level</td><td>{`${dataPoint.batteryCharge ? `${dataPoint.batteryCharge}%` : 'N/A'}`}</td></tr>
-            <tr><td>Battery Charged</td><td>{`${dataPoint.deltaBatteryCharge ? `${dataPoint.deltaBatteryCharge.toFixed(3)} Ah` : 'N/A'}`}</td></tr>
-            <tr><td>Battery Capacity</td><td>{`${dataPoint.batteryCapacity ? `${dataPoint.batteryCapacity} Ah` : 'N/A'}`}</td></tr>
+            <tr><td>Battery</td><td>{`${dataPoint.batteryCharge && dataPoint.batteryCapacity ?
+              `${dataPoint.batteryCharge}% × ${dataPoint.batteryCapacity} Ah` : 'N/A'}`}</td></tr>
           </tbody>
         </table>
       ) : (
