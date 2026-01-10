@@ -21,7 +21,7 @@ const connection = new Connection({
     signals: ['rpm', 'speed', 'batteryCharge', 'fuelLevel', 'fuelConsumption', 'odometer', 'steeringAngle'],
     calculator: new KaCalculator(),
     debug: false,
-    logFile: './can.log'
+    logFile: `./can-${new Date().toISOString().replace(/[:.]/g, '-')}.log`
 });
 
 connection.connect();
