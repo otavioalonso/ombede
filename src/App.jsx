@@ -1,26 +1,6 @@
 
 import { useEffect, useState } from 'react';
 
-// Show viewport and screen info as overlay for 30 seconds
-import { useRef } from 'react';
-
-function useScreenOverlay() {
-  const [show, setShow] = useState(true);
-  const [info, setInfo] = useState(null);
-  const timeoutRef = useRef();
-  useEffect(() => {
-    setInfo({
-      innerWidth: window.innerWidth,
-      innerHeight: window.innerHeight,
-      screenWidth: window.screen.width,
-      screenHeight: window.screen.height,
-      devicePixelRatio: window.devicePixelRatio,
-    });
-    timeoutRef.current = setTimeout(() => setShow(false), 30000);
-    return () => clearTimeout(timeoutRef.current);
-  }, []);
-  return show ? info : null;
-}
 import './App.css';
 
 function useCANWebSocket(onData) {
@@ -40,7 +20,6 @@ function useCANWebSocket(onData) {
 
 function App() {
   const [dataPoint, setDataPoint] = useState(null);
-  const overlayInfo = useScreenOverlay();
 
   useCANWebSocket((dataPoint) => {
     setDataPoint(dataPoint);
@@ -48,27 +27,6 @@ function App() {
 
   return (
     <div className="can-dashboard-bg">
-      {overlayInfo && (
-        <div style={{
-          position: 'fixed',
-          top: 20,
-          left: 20,
-          zIndex: 9999,
-          background: 'rgba(0,0,0,0.85)',
-          color: '#fff',
-          padding: '1.2rem 2rem',
-          borderRadius: 12,
-          fontSize: 40 ,
-          fontFamily: 'monospace',
-          boxShadow: '0 2px 12px #0008',
-        }}>
-          <div><b>window.innerWidth:</b> {overlayInfo.innerWidth}</div>
-          <div><b>window.innerHeight:</b> {overlayInfo.innerHeight}</div>
-          <div><b>screen.width:</b> {overlayInfo.screenWidth}</div>
-          <div><b>screen.height:</b> {overlayInfo.screenHeight}</div>
-          <div><b>devicePixelRatio:</b> {overlayInfo.devicePixelRatio}</div>
-        </div>
-      )}
       <main className="can-dashboard-main">
         {dataPoint ? (
           <section className="can-dashboard-card fullscreen-card">
