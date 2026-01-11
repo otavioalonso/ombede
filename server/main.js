@@ -1,6 +1,7 @@
 import { Connection } from "./cannect.js";
 import { KaCalculator } from "./calculator.js";
 import { WebSocketServer } from 'ws';
+import fs from 'fs';
 
 // WebSocket server setup
 const server = new WebSocketServer({ port: 3002 });
@@ -15,13 +16,26 @@ function broadcast(data) {
     });
 }
 
+const baseLogFile = `./can-${new Date().toISOString().replace(/[:.]/g, '-')}.log`;
+let logFile = baseLogFile;
+let count = 1;
+while (fs.existsSync(logFile)) {
+    const extIndex = baseLogFile.lastIndexOf('.');
+    if (extIndex !== -1) {
+        logFile = `${baseName.slice(0, extIndex)}_${count}${baseName.slice(extIndex)}`;
+    } else {
+        logFile = `${baseName}_${count}`;
+    }
+    count++;
+}
+
 const connection = new Connection({
     host: 'localhost',
     parser: './can/ford_ka.json',
     signals: ['rpm', 'speed', 'batteryCharge', 'fuelLevel', 'fuelConsumption', 'odometer', 'steeringAngle'],
     calculator: new KaCalculator(),
     debug: false,
-    logFile: `./can-${new Date().toISOString().replace(/[:.]/g, '-')}.log`
+    logFile: logFile
 });
 
 connection.connect();
