@@ -1,0 +1,84 @@
+.steering-arc-container {
+  position: absolute;
+  left: clamp(-20%, -15vw, 0%);
+  top: 32vw;
+  /* bottom: clamp(1rem, 5vh, 5rem); */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: clamp(1350px, 189vw, 2700px);
+  height: clamp(200px, 30vh, 400px);
+}
+
+.steering-arc {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 1;
+}
+
+.steering-arc-segment {
+  position: absolute;
+  width: clamp(4px, 0.7vw, 10px);
+  height: clamp(28px, 6vh, 54px);
+  border-radius: 2px;
+  z-index: 2;
+  transition: background 0.2s;
+}
+
+.steering-arc-segment.major {
+  height: clamp(42px, 8vh, 78px);
+}
+
+.steering-arc-segment.current {
+  width: clamp(6px, 0.8vw, 14px);
+  height: clamp(48px, 9vh, 90px);
+  background: #fff !important;
+  box-shadow: 0 0 10px #fff, 0 0 2px #fff;
+  z-index: 10;
+}
+
+.steering-arc-tick {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.steering-arc-tick-label {
+  position: absolute;
+  top: -10vh;
+  font-size: 3vw;
+  color: #78909c;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: rotate(0deg); /* Counter-rotate to keep text upright */
+}
+
+.steering-arc-tick.current .steering-arc-tick-label {
+  color: #fff;
+  font-weight: bold;
+}
+
+.steering-arc-value {
+  position: absolute;
+  top: -8vw;
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+}
+
+.steering-arc-number {
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  font-weight: 700;
+  color: #eee;
+  line-height: 1;
+}
+
+.steering-arc-unit {
+  font-size: 3vw;
+  color: #aaa;
+  font-weight: 400;
+}

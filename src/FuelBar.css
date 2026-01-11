@@ -1,0 +1,132 @@
+.fuel-bar-container {
+  position: absolute;
+  left: clamp(2%, 8vw, 10%);
+  top: clamp(140px, 28vh, 280px);
+  bottom: clamp(1rem, 5vh, 5rem);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(0.5rem, 1vw, 1.5rem);
+}
+
+.fuel-bar {
+  position: relative;
+  width: clamp(60px, 12vh, 120px);
+  height: 100%;
+  border-radius: 8px;
+}
+
+.fuel-bar-segment {
+  position: absolute;
+  width: calc(clamp(28px, 9vh, 84px) / 2);
+  height: clamp(4px, 0.7vw, 10px);
+  border-radius: 2px;
+  z-index: 2;
+  transition: background 0.2s;
+}
+
+.fuel-bar-segment.left {
+  right: 50%;
+  transform: translateY(50%);
+}
+
+.fuel-bar-segment.right {
+  left: 50%;
+  transform: translateY(50%);
+}
+
+.fuel-bar-segment.major {
+  width: calc(clamp(42px, 12vh, 150px) / 2);
+}
+
+.fuel-bar-segment.current {
+  width: calc(clamp(48px, 9vh, 90px) / 2);
+  height: clamp(6px, 0.8vw, 14px);
+  background: #fff !important;
+  box-shadow: 0 0 10px #fff, 0 0 2px #fff;
+  z-index: 10;
+}
+
+.fuel-bar-segment.current.left {
+  transform: translateY(50%);
+}
+
+.fuel-bar-segment.current.right {
+  transform: translateY(50%);
+}
+
+.fuel-bar-tick {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  transform: translateY(50%);
+  pointer-events: none;
+}
+
+.fuel-bar-tick-line {
+  width: 100%;
+  height: 1px;
+}
+
+.fuel-bar-tick-label {
+  position: absolute;
+  left: clamp(-100px, -12vw, -150px);
+  right: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: clamp(2rem, 4vw, 4rem);
+  color: #78909c;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.fuel-bar-tick.current .fuel-bar-tick-label {
+  color: #fff;
+  font-weight: bold;
+}
+
+.fuel-bar-labels {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-around;
+  height: 100%;
+  gap: clamp(0.5rem, 1vh, 1rem);
+}
+
+.fuel-bar-label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.fuel-bar-value {
+  font-size: clamp(1.5rem, 3vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.fuel-bar-unit {
+  font-size: clamp(0.8rem, 1.5vw, 1.5rem);
+  color: #607d8b;
+  font-weight: 400;
+}
+
+.fuel-bar-label.tank .fuel-bar-value {
+  color: #039be5;
+}
+
+.fuel-bar-label.calculated .fuel-bar-value {
+  color: #ff9800;
+}
+
+.fuel-bar-label.ethanol .fuel-bar-value {
+  color: #43a047;
+}
+
+.fuel-bar-label.injected .fuel-bar-value {
+  color: #6d4c41;
+}

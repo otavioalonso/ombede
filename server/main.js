@@ -32,7 +32,7 @@ while (fs.existsSync(logFile)) {
 const connection = new Connection({
     host: 'localhost',
     parser: './can/ford_ka.json',
-    signals: ['rpm', 'speed', 'batteryCharge', 'fuelLevel', 'fuelConsumption', 'odometer', 'steeringAngle'],
+    signals: ['rpm', 'speed', 'batteryCharge', 'fuelLevel', 'fuelConsumption', 'fuelEthanolFraction', 'odometer', 'steeringAngle'],
     calculator: new KaCalculator(),
     debug: false,
     logFile: logFile

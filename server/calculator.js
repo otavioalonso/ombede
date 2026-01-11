@@ -96,7 +96,9 @@ class KaCalculator extends BaseCalculator {
             gear: ['distancePerRevolution'],
             fuelEfficiency: ['speed', 'fuelFlow'],
             totalFuelConsumption: ['fuelConsumption'],
-            fuelFlow: ['fuelConsumption', 'time']
+            fuelFlow: ['fuelConsumption', 'time'],
+            turningRadius: ['steeringAngle'],
+            maxSteeringAngle: ['speed']
         };
         this.distancePerRevolutionDict = {
             0: 0.0,
@@ -106,6 +108,7 @@ class KaCalculator extends BaseCalculator {
             4: 40.0,
             5: 50.0,
         };
+        this.wheelbase = 2.49; // Ford Ka wheelbase in meters
     }
 
     // Compute derived quantities
@@ -115,6 +118,8 @@ class KaCalculator extends BaseCalculator {
         if (quantities.includes('gear')) this.computeGear();
         if (quantities.includes('totalFuelConsumption') || quantities.includes('fuelFlow')) this.computeFuelConsumption();
         if (quantities.includes('fuelEfficiency')) this.computeFuelEfficiency();
+        if (quantities.includes('turningRadius')) this.computeTurningRadius();
+        if (quantities.includes('maxSteeringAngle')) this.computeMaxSteeringAngle();
     }
 
     computeDistancePerRevolution() {
@@ -166,6 +171,38 @@ class KaCalculator extends BaseCalculator {
             this.data['fuelEfficiency'] = 0;
         } else {
             this.data['fuelEfficiency'] = this.data['fuelFlow'] / this.data['speed'];
+        }
+    }
+
+    computeTurningRadius() {
+        const steeringAngle = this.data['steeringAngle'] || 0;
+        if (Math.abs(steeringAngle) < 0.5) {
+            this.data['turningRadius'] = Infinity;
+        } else {
+            const steeringAngleRad = Math.abs(steeringAngle) * (Math.PI / 180);
+            this.data['turningRadius'] = this.wheelbase / Math.tan(steeringAngleRad);
+        }
+    }
+
+    // Compute max safe steering angle based on current speed
+    // Uses lateral acceleration limit (typically 0.3-0.5g for comfort, up to 0.8g for sporty driving)
+    // Formula: a_lat = v^2 / r, and r = wheelbase / tan(steering_angle)
+    // So: max_steering_angle = atan(wheelbase * a_lat / v^2)
+    computeMaxSteeringAngle() {
+        const speed = this.data['speed'] || 0;
+        const lateralAccelLimit = 8.0; // m/s^2 (~0.4g, comfortable limit)
+        
+        if (speed < 5) {
+            // At very low speeds, full steering range is safe
+            this.data['maxSteeringAngle'] = 30;
+        } else {
+            // Convert speed from km/h to m/s
+            const speedMs = speed / 3.6;
+            // Calculate max steering angle from lateral acceleration limit
+            const maxAngleRad = Math.atan(this.wheelbase * lateralAccelLimit / (speedMs * speedMs));
+            const maxAngleDeg = maxAngleRad * (180 / Math.PI);
+            // Clamp to steering range
+            this.data['maxSteeringAngle'] = Math.min(30, Math.max(1, maxAngleDeg));
         }
     }
 

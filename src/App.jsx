@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 
 import './App.css';
 import RpmBar from './RpmBar';
+import FuelBar from './FuelBar';
+import SteeringArc from './SteeringArc';
 
 function useCANWebSocket(onData) {
   useEffect(() => {
@@ -21,9 +23,14 @@ function useCANWebSocket(onData) {
 
 function App() {
   const [dataPoint, setDataPoint] = useState(null);
+  const [initialFuelLevel, setInitialFuelLevel] = useState(null);
 
   useCANWebSocket((dataPoint) => {
     setDataPoint(dataPoint);
+    // Capture initial fuel level on first data point
+    if (initialFuelLevel === null && dataPoint.fuelLevel) {
+      setInitialFuelLevel(dataPoint.fuelLevel);
+    }
   });
 
   return (
@@ -36,8 +43,19 @@ function App() {
               rpmUp={dataPoint.rpmUp || 0} 
               rpmDown={dataPoint.rpmDown || 0} 
             />
+            <FuelBar
+              fuelLevel={dataPoint.fuelLevel || 0}
+              ethanolContent={dataPoint.ethanolContent || 0}
+              totalFuelConsumption={dataPoint.totalFuelConsumption || 0}
+              initialFuelLevel={initialFuelLevel || dataPoint.fuelLevel || 0}
+            />
+            <SteeringArc
+              steeringAngle={dataPoint.steeringAngle || 0}
+              turningRadius={dataPoint.turningRadius}
+              maxSteeringAngle={dataPoint.maxSteeringAngle || 30}
+            />
             <div className="can-dashboard-grid">
-              {/* Row 1: Speed | Gear | Steering */}
+              {/* Row 1: Speed | Gear | Tank */}
               <div className="can-metric speed">
                 <div className="can-metric-value big speed">{dataPoint.speed ? dataPoint.speed.toFixed(0) : '--'}</div>
                 <div className="can-metric-label">Speed (km/h)</div>
@@ -46,28 +64,11 @@ function App() {
                 <div className="can-metric-value big gear">{dataPoint.gear ? dataPoint.gear : '--'}</div>
                 <div className="can-metric-label">Gear</div>
               </div>
-              <div className="can-metric steering">
-                <div className="can-metric-value big steering">{dataPoint.steeringAngle ? `${dataPoint.steeringAngle.toFixed(0)}°` : '--'}</div>
-                <div className="can-metric-label">Steering</div>
-              </div>
-              {/* Row 2: RPM Down | RPM | RPM Up */}
-              <div className="can-metric rpmdown">
-                <div className="can-metric-value regular rpmdown">{dataPoint.rpmDown ? (dataPoint.rpmDown/1000).toFixed(1) : '--'}</div>
-                <div className="can-metric-label">Gear down (RPM)</div>
-              </div>
-              <div className="can-metric rpm">
-                <div className="can-metric-value big rpm">{dataPoint.rpm ? (dataPoint.rpm/1000).toFixed(1) : '--'}</div>
-                <div className="can-metric-label">RPM (× 1000)</div>
-              </div>
-              <div className="can-metric rpmup">
-                <div className="can-metric-value regular rpmup">{dataPoint.rpmUp ? (dataPoint.rpmUp/1000).toFixed(1) : '--'}</div>
-                <div className="can-metric-label">Gear up (RPM)</div>
-              </div>
-              {/* Row 3: Tank | Injected | Battery */}
               <div className="can-metric tank">
                 <div className="can-metric-value regular tank">{dataPoint.fuelLevel ? (dataPoint.fuelLevel * 51/100).toFixed(1) : '--'}</div>
                 <div className="can-metric-label">Tank (L)</div>
               </div>
+              {/* Row 2: Injected | Battery | Ethanol */}
               <div className="can-metric injected">
                 <div className="can-metric-value regular injected">{dataPoint.totalFuelConsumption ? Number(dataPoint.totalFuelConsumption.toFixed(0)).toLocaleString() : '--'}</div>
                 <div className="can-metric-label">Injected (mL)</div>
@@ -75,6 +76,10 @@ function App() {
               <div className="can-metric battery">
                 <div className="can-metric-value regular battery">{dataPoint.batteryCharge && dataPoint.batteryCapacity ? `${dataPoint.batteryCharge}%` : '--'}</div>
                 <div className="can-metric-label">Battery {dataPoint.batteryCapacity ? `(${dataPoint.batteryCapacity} Ah)` : ''}</div>
+              </div>
+              <div className="can-metric ethanol">
+                <div className="can-metric-value regular ethanol">{dataPoint.ethanolContent ? `${dataPoint.ethanolContent.toFixed(0)}%` : '--'}</div>
+                <div className="can-metric-label">Ethanol</div>
               </div>
             </div>
           </section>

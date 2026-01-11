@@ -1,10 +1,12 @@
 .rpm-bar-segment-bar.current {
-  width: 5px;
-  height: 32px;
-  top: 0;
+  width: clamp(6px, 0.8vw, 14px);
+  height: clamp(48px, 9vh, 90px);
+  top: 50%;
+  bottom: auto;
   background: #fff !important;
   box-shadow: 0 0 10px #fff, 0 0 2px #fff;
   z-index: 10;
+  transform: translateX(-50%) translateY(-50%);
 }
 
 .rpm-bar-tick.current .rpm-bar-tick-line {
@@ -16,7 +18,7 @@
 }
 .rpm-bar-tick.current .rpm-bar-tick-label {
   color: #fff;
-  /* font-weight: bold; */
+  font-weight: bold;
   /* font-size: 1rem; */
   /* text-shadow: 0 0 4px #000, 0 0 2px #fff; */
 }
@@ -38,10 +40,10 @@
 
 .rpm-bar-tick-label {
   position: absolute;
-  top: -32px;
+  top: -180%;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 1.5rem;
+  font-size: clamp(2rem, 4vw, 4rem);
   color: #78909c;
   margin-top: 0.2rem;
   white-space: nowrap;
@@ -49,28 +51,28 @@
 }
 .rpm-bar {
   width: 90%;
-  padding: 1rem;
+  padding: clamp(0.75rem, 1.5vw, 2rem);
   /* background: black; */
   border-radius: 8px;
-  margin: 1rem 0;
+  margin: clamp(0.75rem, 1.5vh, 2rem) 0;
   position: absolute;
-  top: 24px;
+  top: 10%;
   left: 2.5%;
 }
 
 .rpm-bar-segment-bar {
   position: absolute;
-  top: 6px;
-  width: 3px;
-  height: 20px;
+  top: 50%;
+  width: clamp(4px, 0.7vw, 10px);
+  height: clamp(28px, 6vh, 54px);
   border-radius: 2px;
   z-index: 2;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-50%);
   transition: background 0.2s;
 }
 
 .rpm-bar-segment-bar.major {
-  top: 2px;
-  height: 28px;
+  top: 50%;
+  height: clamp(42px, 8vh, 78px);
   /* width: 3px; */
 }

@@ -6,9 +6,10 @@
   max-width: 100vw !important;
   max-height: 100vh !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: clamp(140px, 28vh, 280px) 2vw 2vw clamp(180px, 22vw, 300px) !important;
   border-radius: 0 !important;
   box-shadow: none !important;
+  box-sizing: border-box !important;
 }
 .can-dashboard-bg {
   min-height: 100vh;
@@ -19,38 +20,38 @@
   padding: 0;
   margin: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
 }
 .can-dashboard-main {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-end;
   width: 100vw;
   height: 100vh;
+  padding-top: clamp(140px, 28vh, 280px);
 }
 .can-dashboard-card {
-  padding: 2.5vw 2vw 2vw 2vw;
+  padding: clamp(1rem, 1.5vw, 2rem) 2vw 2vw 2vw;
   width: min(96vw, 1200px);
-  height: min(80vh, 700px);
-  margin: 0 1vw;
+  height: min(50vh, 450px);
+  margin: 0 1vw clamp(1rem, 2vh, 2rem) 1vw;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 .can-dashboard-grid {
+  position: absolute;
+  right: 10%;
+  bottom: 5%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: clamp(1rem, 3vw, 2.5rem) clamp(1rem, 3vw, 2.5rem);
-  font-size: clamp(1rem, 2vw, 1.3rem);
-  width: 100%;
-  height: 100%;
-  min-width: 320px;
-  min-height: 320px;
-  max-width: 100%;
-  max-height: 100%;
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(0.4rem, 1.5vw, 1rem);
+  font-size: clamp(0.9rem, 1.8vw, 1.2rem);
+  width: 68vw;
+  height: auto;
   align-items: stretch;
   justify-items: center;
 }
@@ -65,53 +66,9 @@
 }
 .can-metric-value {
   line-height: 1.1;
+  font-size: clamp(2rem, 7vw, 5rem);
   font-weight: 700;
-}
-.can-metric-value {
-  font-size: clamp(1.2rem, 2.5vw, 2.2rem);
-}
-.can-metric-value.speed {
-  color: #1976d2;
-  font-size: clamp(2rem, 7vw, 5rem);
-}
-.can-metric-value.gear {
-  color: #fbc02d;
-  font-size: clamp(1.7rem, 6vw, 4rem);
-  font-weight: 600;
-}
-.can-metric-value.steering {
-  color: #8e24aa;
-  font-size: clamp(1.3rem, 5vw, 3.5rem);
-  font-weight: 600;
-}
-.can-metric-value {
-  line-height: 1.1;
-}
-.can-metric-value.big {
-  font-size: clamp(2rem, 7vw, 5rem);
-    font-weight: 700;
-}
-.can-metric-value.regular {
-  font-size: clamp(1.7rem, 5vw, 5rem);
-    font-weight: 500;
-}
-.can-metric-value.speed { color: #1976d2; }
-.can-metric-value.gear { color: #fbc02d; }
-.can-metric-value.steering { color: #8e24aa; }
-.can-metric-value.rpm { color: #43a047; }
-.can-metric-value.rpmdown { color: #c62828; }
-.can-metric-value.rpmup { color: #2e7d32; }
-.can-metric-value.tank { color: #039be5; }
-.can-metric-value.injected { color: #6d4c41; }
-.can-metric-value.battery { color: #ff7043; }
-
-.can-metric-value.injected {
-  color: #6d4c41;
-  font-weight: 500;
-}
-.can-metric-value.battery {
-  color: #ff7043;
-  font-weight: 500;
+  color: white;
 }
 .can-metric-label {
   color: #607d8b;
