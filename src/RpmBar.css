@@ -1,0 +1,94 @@
+.rpm-bar-container {
+  width: 100%;
+  padding: 1rem;
+  background: #1a1a2e;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.rpm-bar-label {
+  font-size: 0.9rem;
+  color: #90a4ae;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.rpm-bar-track {
+  position: relative;
+  height: 32px;
+  background: #263238;
+  border-radius: 4px;
+  overflow: visible;
+}
+
+.rpm-bar-segment {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: width 0.1s ease-out, left 0.1s ease-out;
+}
+
+.rpm-bar-tick {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.rpm-bar-tick-line {
+  width: 1px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.rpm-bar-tick-label {
+  font-size: 0.65rem;
+  color: #78909c;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+.rpm-bar-needle {
+  position: absolute;
+  top: -4px;
+  width: 3px;
+  height: calc(100% + 8px);
+  background: #ffffff;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+  transition: left 0.1s ease-out;
+  z-index: 10;
+}
+
+.rpm-bar-values {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.rpm-value {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.rpm-value.rpm-down {
+  color: #64b5f6;
+}
+
+.rpm-value.rpm-current {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.rpm-value.rpm-up {
+  color: #ef5350;
+}

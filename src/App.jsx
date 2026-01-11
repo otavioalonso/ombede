@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 
 import './App.css';
+import RpmBar from './RpmBar';
 
 function useCANWebSocket(onData) {
   useEffect(() => {
@@ -30,6 +31,11 @@ function App() {
       <main className="can-dashboard-main">
         {dataPoint ? (
           <section className="can-dashboard-card fullscreen-card">
+            <RpmBar 
+              rpm={dataPoint.rpm || 0} 
+              rpmUp={dataPoint.rpmUp || 0} 
+              rpmDown={dataPoint.rpmDown || 0} 
+            />
             <div className="can-dashboard-grid">
               {/* Row 1: Speed | Gear | Steering */}
               <div className="can-metric speed">
