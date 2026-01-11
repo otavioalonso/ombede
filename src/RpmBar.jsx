@@ -1,89 +1,76 @@
 import './RpmBar.css';
 
+const MAX_RPM = 8000;
+const SEGMENT_LINE_INTERVAL = 100; // vertical line every 100 RPM
+const SEGMENT_LINE_MAJOR = 500; // every 5th line (500 RPM) is taller
+
 // Returns color based on RPM value thresholds
 function getRpmColor(rpm) {
   if (rpm >= 5000) return '#e53935'; // red
-  if (rpm >= 3000) return '#fdd835'; // yellow
-  if (rpm >= 1000) return '#43a047'; // green
+  if (rpm >= 2000) return '#fdcc3aff'; // yellow
+  if (rpm >= 1000) return '#00bb09ff'; // green
   return '#1e88e5'; // blue
 }
 
-const MAX_RPM = 8000;
-const TICK_INTERVAL = 1000; // vertical line every 1000 RPM
-
 export default function RpmBar({ rpm = 0, rpmUp = 0, rpmDown = 0 }) {
-  // Clamp values to valid range
-  const clamp = (v) => Math.max(0, Math.min(MAX_RPM, v));
-  const rpmClamped = clamp(rpm);
-  const rpmUpClamped = clamp(rpmUp);
-  const rpmDownClamped = clamp(rpmDown);
 
-  // Sort values to determine segment order (lowest to highest)
-  const sorted = [
-    { key: 'rpmUp', value: rpmUpClamped },
-    { key: 'rpm', value: rpmClamped },
-    { key: 'rpmDown', value: rpmDownClamped },
-  ].sort((a, b) => a.value - b.value);
+  const regionRanges = [
+    { from: 0, to: rpmUp, color: '#777' },
+    { from: rpmUp, to: rpm, color: getRpmColor(rpmUp) },
+    { from: rpm, to: rpmDown, color: getRpmColor(rpmDown) },
+  ];
 
-  // Build segments: from 0 to sorted[0], sorted[0] to sorted[1], sorted[1] to sorted[2]
-  const segments = [];
-  let prev = 0;
-  for (const item of sorted) {
-    if (item.value > prev) {
-      segments.push({
-        start: prev,
-        end: item.value,
-        color: getRpmColor(item.value),
-        key: item.key,
-      });
-      prev = item.value;
+  // Generate vertical bars (every 100 RPM)
+  const segmentBars = [];
+  for (let t = 0; t <= MAX_RPM; t += SEGMENT_LINE_INTERVAL) {
+    // Determine color for this bar
+    let color = '#222'; // default black
+    for (const region of regionRanges) {
+      if (t >= region.from && t < region.to) {
+        color = region.color;
+        break;
+      }
     }
+    segmentBars.push({
+      rpm: t,
+      major: t % SEGMENT_LINE_MAJOR === 0,
+      color,
+    });
   }
-
-  // Generate tick marks
+  // Generate tick marks (every 1000 RPM)
   const ticks = [];
-  for (let t = 0; t <= MAX_RPM; t += TICK_INTERVAL) {
+  for (let t = 0; t <= MAX_RPM; t += 1000) {
     ticks.push(t);
   }
 
   return (
-    <div className="rpm-bar-container">
-      <div className="rpm-bar-label">RPM</div>
-      <div className="rpm-bar-track">
-        {/* Segments */}
-        {segments.map((seg, i) => (
-          <div
-            key={i}
-            className="rpm-bar-segment"
-            style={{
-              left: `${(seg.start / MAX_RPM) * 100}%`,
-              width: `${((seg.end - seg.start) / MAX_RPM) * 100}%`,
-              backgroundColor: seg.color,
-            }}
-          />
-        ))}
-        {/* Tick marks */}
-        {ticks.map((t) => (
-          <div
-            key={t}
-            className="rpm-bar-tick"
-            style={{ left: `${(t / MAX_RPM) * 100}%` }}
-          >
-            <div className="rpm-bar-tick-line" />
-            <div className="rpm-bar-tick-label">{t / 1000}k</div>
-          </div>
-        ))}
-        {/* Current RPM indicator */}
-        <div
-          className="rpm-bar-needle"
-          style={{ left: `${(rpmClamped / MAX_RPM) * 100}%` }}
-        />
+    <div className="rpm-bar">
+        {segmentBars.map((bar, i) => {
+          const isCurrent = Math.abs(bar.rpm - rpm) < SEGMENT_LINE_INTERVAL/2;
+          return (
+            <div
+              key={i}
+              className={`rpm-bar-segment-bar${bar.major ? ' major' : ''}${isCurrent ? ' current' : ''}`}
+              style={{
+                left: `${(bar.rpm / MAX_RPM) * 100}%`,
+                backgroundColor: isCurrent ? '#fff' : bar.color,
+              }}
+            />
+          );
+        })}
+        {ticks.map((t) => {
+          const isCurrent = (rpm >= t-500) && (rpm <= t + 500);
+          return (
+            <div
+              key={t}
+              className={`rpm-bar-tick${isCurrent ? ' current' : ''}`}
+              style={{ left: `${(t / MAX_RPM) * 100}%` }}
+            >
+              <div className="rpm-bar-tick-line" />
+              <div className="rpm-bar-tick-label">{t / 1000}</div>
+            </div>
+          );
+        })}
       </div>
-      <div className="rpm-bar-values">
-        <span className="rpm-value rpm-down">▼ {rpmDownClamped}</span>
-        <span className="rpm-value rpm-current">{rpmClamped}</span>
-        <span className="rpm-value rpm-up">▲ {rpmUpClamped}</span>
-      </div>
-    </div>
   );
 }

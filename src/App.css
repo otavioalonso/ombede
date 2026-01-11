@@ -15,7 +15,6 @@
   min-width: 100vw;
   height: 100vh;
   width: 100vw;
-  background: linear-gradient(120deg, #f8fafc 0%, #e0e7ef 100%);
   font-family: 'Inter', sans-serif;
   padding: 0;
   margin: 0;
@@ -31,9 +30,6 @@
   height: 100vh;
 }
 .can-dashboard-card {
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 4px 24px #0002;
   padding: 2.5vw 2vw 2vw 2vw;
   width: min(96vw, 1200px);
   height: min(80vh, 700px);
@@ -42,7 +38,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s;
 }
 .can-dashboard-grid {
   display: grid;
@@ -58,8 +53,8 @@
   max-height: 100%;
   align-items: stretch;
   justify-items: center;
-  transition: all 0.3s;
 }
+
 .can-metric {
   text-align: center;
   display: flex;
