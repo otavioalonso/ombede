@@ -113,12 +113,12 @@
             "signals": [
                 {
                     "bit_length": 16,
-                    "factor": 0.005625,
+                    "factor": -0.005625,
                     "is_big_endian": true,
                     "is_float": false,
                     "is_signed": false,
                     "name": "steeringAngle",
-                    "offset": -180,
+                    "offset": 180,
                     "start_bit": 7,
                     "unit": "deg"
                 }
