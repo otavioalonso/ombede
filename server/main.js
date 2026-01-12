@@ -53,4 +53,4 @@ setInterval(() => {
         // console.log(dataBuffer.at(-1));
         dataBuffer = [];
     }
-}, 500);
+}, 40); // 25 FPS
