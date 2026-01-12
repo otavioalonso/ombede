@@ -2,9 +2,13 @@ import './SteeringArc.css';
 
 const MIN_ANGLE = -30; // degrees
 const MAX_ANGLE = 30; // degrees
-const SEGMENT_INTERVAL = 1; // segment every 2 degrees
-const SEGMENT_MAJOR = 10; // major segment every 10 degrees
-const ARC_RADIUS = 80; // percentage of container height for segment positioning
+const SEGMENT_INTERVAL = 1; // segment
+const SEGMENT_MAJOR = 10; // major segment
+
+// Generate subticks for small angles
+const SUBTICK_RANGE = 3; // subticks
+const SUBTICK_INTERVAL = 1/16; // subtick
+const SUBTICK_DISPLAY_BELOW = 3;
 
 // Returns color based on whether segment is within safe zone
 function getSegmentColor(segmentAngle, maxSteeringAngle) {
@@ -41,12 +45,22 @@ export default function SteeringArc({ steeringAngle = 0, turningRadius = Infinit
     ticks.push(deg);
   }
 
+
+  const subticks = [];
+  for (let deg = -SUBTICK_RANGE; deg <= SUBTICK_RANGE; deg += SUBTICK_INTERVAL) {
+    // Skip if it would overlap with a major tick (0°)
+    if (deg !== 0) {
+      const color = getSegmentColor(deg, maxSteeringAngle);
+      subticks.push({ angle: deg, color });
+    }
+  }
+
   // Non-linear scaling: amplifies small angles for better visibility at high speeds
   // Square root for angles up to 5°, then linear for larger angles
   const nonLinearScale = (angle, maxAngle = 30) => {
     const sign = angle >= 0 ? 1 : -1;
     const absAngle = Math.abs(angle);
-    const threshold = 5; // transition point from sqrt to linear
+    const threshold =  30; // transition point from sqrt to linear
     
     // Calculate the scaled threshold value (where sqrt meets linear)
     // At threshold: sqrt(5/30) * 30 ≈ 12.25
@@ -55,7 +69,7 @@ export default function SteeringArc({ steeringAngle = 0, turningRadius = Infinit
     let scaled;
     if (absAngle <= threshold) {
       // Square root scaling for small angles (0-5°)
-      scaled = Math.sqrt(absAngle / maxAngle) * maxAngle;
+      scaled = Math.pow(absAngle / maxAngle, 0.4) * maxAngle;
     } else {
       // Linear scaling for larger angles (5-30°), offset to match at threshold
       // scaled = sqrtAtThreshold + (absAngle - threshold)
@@ -144,8 +158,24 @@ export default function SteeringArc({ steeringAngle = 0, turningRadius = Infinit
                 transform: `translate(-50%, -50%) translate(${pos.xVw}vw, ${pos.yVw}vw) rotate(${pos.rotation}deg)`,
               }}
             >
-              <div className="steering-arc-tick-label">{deg}°</div>
+              <div className="steering-arc-tick-label">{Math.abs(deg)}°</div>
             </div>
+          );
+        })}
+        {/* Subticks for small angles (within ±2°) - only show when maxSteeringAngle < 5° */}
+        {maxSteeringAngle < SUBTICK_DISPLAY_BELOW && subticks.map((subtick) => {
+          const pos = angleToPosition(subtick.angle, true);
+          return (
+            <div
+              key={`subtick-${subtick.angle}`}
+              className="steering-arc-subtick"
+              style={{
+                left: '50%',
+                top: '100%',
+                transform: `translate(-50%, -50%) translate(${pos.xVw}vw, ${pos.yVw}vw) rotate(${pos.rotation}deg)`,
+                backgroundColor: subtick.color,
+              }}
+            />
           );
         })}
       </div>

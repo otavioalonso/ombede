@@ -176,7 +176,7 @@ class KaCalculator extends BaseCalculator {
 
     computeTurningRadius() {
         const steeringAngle = this.data['steeringAngle'] || 0;
-        if (Math.abs(steeringAngle) < 0.5) {
+        if (Math.abs(steeringAngle) < 0.1) {
             this.data['turningRadius'] = Infinity;
         } else {
             const steeringAngleRad = Math.abs(steeringAngle) * (Math.PI / 180);
