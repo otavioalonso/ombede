@@ -11,8 +11,6 @@ const FRAME_LENGTH = 8;
 const DEBUG = process.env.SIM_DEBUG === 'true';
 
 const REPLAY = process.env.REPLAY || false;
-// If REPLAY_LOOP=true the replay will loop when it reaches EOF
-const REPLAY_LOOP = process.env.REPLAY_LOOP === 'true';
 // Replay speed multiplier: 1 = real time, 2 = twice as fast, 0.5 = half speed
 const REPLAY_RATE = parseFloat(process.env.REPLAY_RATE) || 1.0;
 
@@ -189,18 +187,6 @@ const server = net.createServer((socket) => {
                         scheduleChunk();
                     }
                     if (replayController.stopped) return;
-                    if (REPLAY_LOOP) {
-                        // Wait for last frame to be sent, then restart
-                        const lastTimer = replayController.timers[replayController.timers.length - 1];
-                        const restartDelay = lastTimer ? 100 : 0;
-                        const t = setTimeout(() => {
-                            if (!replayController.stopped) {
-                                replayController.timers = [];
-                                startReplay();
-                            }
-                        }, restartDelay);
-                        replayController.timers.push(t);
-                    }
                 });
 
                 rl.on('error', (err) => {
