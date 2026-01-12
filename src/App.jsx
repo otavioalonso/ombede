@@ -45,7 +45,7 @@ function App() {
             />
             <FuelBar
               fuelLevel={dataPoint.fuelLevel || 0}
-              ethanolContent={dataPoint.ethanolContent || 0}
+              ethanolContent={dataPoint.fuelEthanolFraction || 0}
               totalFuelConsumption={dataPoint.totalFuelConsumption || 0}
               initialFuelLevel={initialFuelLevel || dataPoint.fuelLevel || 0}
             />
@@ -78,7 +78,7 @@ function App() {
                 <div className="can-metric-label">Battery {dataPoint.batteryCapacity ? `(${dataPoint.batteryCapacity} Ah)` : ''}</div>
               </div>
               <div className="can-metric ethanol">
-                <div className="can-metric-value regular ethanol">{dataPoint.ethanolContent ? `${dataPoint.ethanolContent.toFixed(0)}%` : '--'}</div>
+                <div className="can-metric-value regular ethanol">{dataPoint.fuelEthanolFraction ? `${dataPoint.fuelEthanolFraction.toFixed(0)}%` : '--'}</div>
                 <div className="can-metric-label">Ethanol</div>
               </div>
             </div>
