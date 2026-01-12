@@ -19,8 +19,6 @@ function useCANWebSocket(onData) {
   }, [onData]);
 }
 
-
-
 function App() {
   const [dataPoint, setDataPoint] = useState(null);
   const [initialFuelLevel, setInitialFuelLevel] = useState(null);
@@ -58,28 +56,28 @@ function App() {
               {/* Row 1: Speed | Gear | Tank */}
               <div className="can-metric speed">
                 <div className="can-metric-value big speed">{dataPoint.speed ? dataPoint.speed.toFixed(0) : '--'}</div>
-                <div className="can-metric-label">Speed (km/h)</div>
+                <div className="can-metric-label">km/h</div>
               </div>
               <div className="can-metric gear">
                 <div className="can-metric-value big gear">{dataPoint.gear ? dataPoint.gear : '--'}</div>
-                <div className="can-metric-label">Gear</div>
+                <div className="can-metric-label">Marcha</div>
               </div>
               <div className="can-metric tank">
                 <div className="can-metric-value regular tank">{dataPoint.fuelLevel ? (dataPoint.fuelLevel * 51/100).toFixed(1) : '--'}</div>
-                <div className="can-metric-label">Tank (L)</div>
+                <div className="can-metric-label">Tanque (L)</div>
               </div>
               {/* Row 2: Injected | Battery | Ethanol */}
               <div className="can-metric injected">
                 <div className="can-metric-value regular injected">{dataPoint.totalFuelConsumption ? Number(dataPoint.totalFuelConsumption.toFixed(0)).toLocaleString() : '--'}</div>
-                <div className="can-metric-label">Injected (mL)</div>
+                <div className="can-metric-label">Consumo (mL)</div>
               </div>
               <div className="can-metric battery">
                 <div className="can-metric-value regular battery">{dataPoint.batteryCharge && dataPoint.batteryCapacity ? `${dataPoint.batteryCharge}%` : '--'}</div>
-                <div className="can-metric-label">Battery {dataPoint.batteryCapacity ? `(${dataPoint.batteryCapacity} Ah)` : ''}</div>
+                <div className="can-metric-label">Bateria {dataPoint.batteryCapacity ? `(${dataPoint.batteryCapacity} Ah)` : ''}</div>
               </div>
               <div className="can-metric ethanol">
                 <div className="can-metric-value regular ethanol">{dataPoint.fuelEthanolFraction ? `${dataPoint.fuelEthanolFraction.toFixed(0)}%` : '--'}</div>
-                <div className="can-metric-label">Ethanol</div>
+                <div className="can-metric-label">Etanol</div>
               </div>
             </div>
           </section>
