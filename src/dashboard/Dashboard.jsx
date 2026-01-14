@@ -12,7 +12,8 @@ function useCANWebSocket(onData) {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'canData') {
-        onData(data.payload.at(-1));
+        data.payload.map(d => onData(d));
+        // onData(data.payload.at(-1));
       }
     };
     return () => ws.close();
