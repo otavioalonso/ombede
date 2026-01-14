@@ -1,0 +1,265 @@
+.signals-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7fafc 0%, #e3e8ee 100%);
+  color: #222;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 1.5rem;
+  user-select: none;
+}
+
+.signals-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(99, 179, 237, 0.2);
+}
+
+.signals-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2b6cb0;
+}
+
+.controls {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.controls input[type="checkbox"] {
+  accent-color: #2b6cb0;
+}
+
+.controls input[type="text"] {
+  width: 140px;
+  padding: 0.4rem 0.6rem;
+  background: #fff;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  color: #222;
+  font-size: 0.85rem;
+}
+
+.controls input[type="text"]:focus {
+  outline: none;
+  border-color: #2b6cb0;
+  box-shadow: 0 0 0 2px #bee3f8;
+}
+
+.controls input[type="number"] {
+  width: 50px;
+  padding: 0.3rem;
+  background: #fff;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  color: #222;
+  text-align: center;
+}
+
+.controls select {
+  padding: 0.3rem 0.5rem;
+  background: #fff;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  color: #222;
+}
+
+.signals-legend {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-tip {
+  color: #aaa;
+  font-style: italic;
+}
+
+.byte-header {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #cbd5e0;
+  font-size: 0.7rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.frame-id-header {
+  width: 70px;
+  text-align: center;
+}
+
+.frame-bytes-header {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.byte-header-cell {
+  width: 103px;
+  text-align: center;
+}
+
+.signals-header-cell {
+  margin-left: 1rem;
+  flex: 1;
+}
+
+.signals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.signals-list::-webkit-scrollbar {
+  display: none;
+}
+
+.can-message-row {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
+  padding: 0 0.5rem;
+  background: #f7fafc;
+  border-radius: 6px;
+  /* transition: all 0.2s ease; */
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+}
+/* 
+.can-message-row:hover {
+  background: rgba(45, 55, 72, 0.8);
+  border-color: rgba(99, 179, 237, 0.2);
+} */
+
+.frame-id {
+  width: 100px;
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2b6cb0;
+  text-align: left;
+}
+
+.frame-bytes {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.byte-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.byte-bits {
+  display: flex;
+  gap: 1px;
+}
+
+.bit-square {
+  width: 12px;
+  height: 12px;
+  border: 1px solid #000000;
+  border-radius: 0px;
+  cursor:pointer;
+  /* transition: all 0.15s ease; */
+  flex-shrink: 0;
+}
+
+.bit-square:hover {
+  transform: scale(1.3);
+  z-index: 10;
+  box-shadow: 0 0 8px rgba(99, 179, 237, 0.4);
+}
+
+.bit-square.empty {
+  background: #fff;
+  border-color: #000000;
+}
+
+.bit-square.filled {
+  background: #222;
+  border-color: #2b6cb0;
+}
+
+.bit-square.selected {
+  border-color: #ed8936 !important;
+  box-shadow: 0 0 6px #ed8936;
+}
+
+.bit-square.empty.highlighted {
+  border-color: #f96800 !important;
+}
+
+.frame-signals {
+  margin-left: 1rem;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.signal-badge {
+  background: #e2e8f0;
+  color: #2b6cb0;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  border: 1px solid #cbd5e0;
+  transition: none;
+}
+
+.signal-badge:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e0;
+}
+
+.signal-name {
+  color: #2b6cb0;
+  font-weight: 500;
+}
+
+.signal-value {
+  color: #222;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+}
+
+/* Fade all non-highlighted bits when hovering a signal badge */
+.bit-square.faded {
+  opacity: 0.2 !important;
+  /* transition: opacity 0.2s; */
+}

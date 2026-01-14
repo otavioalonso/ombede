@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 
-import './App.css';
+import './Dashboard.css';
 import RpmBar from './RpmBar';
 import FuelBar from './FuelBar';
 import SteeringArc from './SteeringArc';
@@ -19,7 +19,7 @@ function useCANWebSocket(onData) {
   }, [onData]);
 }
 
-function App() {
+export default function Dashboard() {
   const [dataPoint, setDataPoint] = useState(null);
   const [initialFuelLevel, setInitialFuelLevel] = useState(null);
 
@@ -104,5 +104,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

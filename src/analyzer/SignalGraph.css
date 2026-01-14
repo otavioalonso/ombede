@@ -1,0 +1,86 @@
+
+.graph-modal {
+  background: linear-gradient(145deg, #1a1a2e 0%, #2d3748 100%);
+  border: 1px solid rgba(99, 179, 237, 0.2);
+  border-radius: 12px;
+  padding: 1.25rem;
+  width: 700px;
+  max-width: 90vw;
+  height: 450px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(79, 209, 197, 0.1);
+}
+
+.graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.graph-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #63b3ed 0%, #4fd1c5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.graph-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.graph-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #a0aec0;
+  font-size: 0.85rem;
+}
+
+.graph-controls select {
+  padding: 0.3rem 0.5rem;
+  background: rgba(26, 32, 44, 0.8);
+  border: 1px solid rgba(99, 179, 237, 0.3);
+  border-radius: 6px;
+  color: #e0e6ed;
+  font-size: 0.85rem;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  color: #718096;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.btn-close:hover {
+  color: #e0e6ed;
+}
+
+.graph-info {
+  color: #718096;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+  background: rgba(26, 32, 44, 0.5);
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(99, 179, 237, 0.1);
+}
+
+.signal-canvas {
+  flex: 1;
+  width: 100%;
+  border-radius: 8px;
+  background: #1a1a2e;
+}

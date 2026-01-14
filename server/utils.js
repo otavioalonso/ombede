@@ -40,4 +40,8 @@ function generateLogFilePath(prefix = '.', extension = 'log') {
     return getUniqueLogFile(baseFilePath);
 }
 
-export { getUniqueLogFile, generateLogFilePath };
+function bigEndianStartBit(start_bit) {
+    return 8*Math.floor(start_bit / 8) + (7 - start_bit % 8);
+}
+
+export { bigEndianStartBit, generateLogFilePath };
