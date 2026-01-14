@@ -15,7 +15,8 @@ function useRawCANWebSocket(onFrame) {
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'rawFrame') {
-        onFrame(data.payload);
+        data.payload.map(d => onFrame(d));
+        // onFrame(data.payload);
       }
     };
     return () => ws.close();

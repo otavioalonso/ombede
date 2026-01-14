@@ -6,6 +6,8 @@ const SIGNALS_FILE = './can/ford_ka.json';
 
 // WebSocket server for raw frames
 let rawServer = null;
+let dataBuffer = [];
+let broadcastInterval = null;
 
 // HTTP server for API
 let httpServer = null;
@@ -118,6 +120,17 @@ function startAnalyzerServer(options = {}) {
         console.log(`HTTP API server listening on port ${apiPort}`);
     });
 
+    const fps = 25;
+    const intervalMs = Math.round(1000 / fps);
+
+    // Periodically broadcast buffered data
+    broadcastInterval = setInterval(() => {
+        if (dataBuffer.length > 0) {
+            broadcastRaw({ type: 'rawFrame', payload: dataBuffer });
+            dataBuffer = [];
+        }
+    }, intervalMs);
+
     return {
         rawServer,
         httpServer,
@@ -125,12 +138,13 @@ function startAnalyzerServer(options = {}) {
     };
 }
 
+
 // Frame handler to attach to a connection
 function createFrameHandler() {
     return (frame) => {
         const parsed = parseRawFrame(frame);
         if (parsed) {
-            broadcastRaw({ type: 'rawFrame', payload: parsed });
+            dataBuffer.push(parsed);
         }
     };
 }
