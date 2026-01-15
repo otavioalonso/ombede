@@ -2,12 +2,12 @@ import { WebSocketServer } from 'ws';
 import fs from 'fs';
 import http from 'http';
 
-const SIGNALS_FILE = './can/ford_ka.json';
-
 // WebSocket server for raw frames
 let rawServer = null;
 let dataBuffer = [];
 let broadcastInterval = null;
+
+const FPS = 25;
 
 // HTTP server for API
 let httpServer = null;
@@ -22,6 +22,8 @@ function broadcastRaw(data) {
     });
 }
 
+let lastUpdate = {}
+
 // Parse raw frame string to extract ID and bytes
 function parseRawFrame(frameStr) {
     // frame is a string like "frame [frame_id(hex)] [time] 00 1A F8 00 00 00 00 00"
@@ -29,8 +31,13 @@ function parseRawFrame(frameStr) {
     if (words.length < 11 || words[0] !== 'frame') return null;
     
     const id = parseInt(words[1], 16);
+    const time = parseFloat(words[2]);
+    if (FPS) {
+        if (lastUpdate[id] && (time - lastUpdate[id] < 1/FPS)) return null;
+        lastUpdate[id] = time;
+    }
     const bytes = words.slice(3, 11).map(b => parseInt(b, 16));
-    return { id, bytes };
+    return { id, time, bytes };
 }
 
 function createApi(defaultLexicon) {
@@ -69,8 +76,16 @@ function createApi(defaultLexicon) {
             req.on('end', () => {
                 try {
                     const { frameId, signal } = JSON.parse(body);
-                    const data = JSON.parse(fs.readFileSync(lexicon, 'utf8'));
+
+                    let data;
                     
+                    try {
+                        data = JSON.parse(fs.readFileSync(lexicon, 'utf8'));
+                    } catch (error) {
+                        fs.writeFileSync(lexicon, '');
+                        data = {messages:[]}
+                    }
+
                     // Find or create the message entry
                     let message = data.messages.find(m => m.id === frameId);
                     if (!message) {
@@ -120,16 +135,13 @@ function startAnalyzerServer(options = {}) {
         console.log(`HTTP API server listening on port ${apiPort}`);
     });
 
-    const fps = 25;
-    const intervalMs = Math.round(1000 / fps);
-
     // Periodically broadcast buffered data
     broadcastInterval = setInterval(() => {
         if (dataBuffer.length > 0) {
             broadcastRaw({ type: 'rawFrame', payload: dataBuffer });
             dataBuffer = [];
         }
-    }, intervalMs);
+    }, FPS ? Math.round(1000 / FPS) : 0.04);
 
     return {
         rawServer,

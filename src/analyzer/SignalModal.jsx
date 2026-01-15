@@ -85,8 +85,20 @@ export default function SignalModal({ frameId, startBit, endBit, onSave, onCance
                   type="checkbox" 
                   checked={isSigned} 
                   onChange={(e) => setIsSigned(e.target.checked)}
+                  disabled={true}
                 />
                 Signed
+              </label>
+            </div>
+            <div className="form-group checkbox">
+              <label>
+                <input 
+                  type="checkbox" 
+                  checked={true} 
+                  // onChange={(e) => setIsSigned(e.target.checked)}
+                  disabled={true}
+                />
+                Big-Endian
               </label>
             </div>
           </div>

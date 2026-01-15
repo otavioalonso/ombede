@@ -7,6 +7,12 @@ import { bigEndianStartBit } from '../../server/utils.js';
 
 import './Analyzer.css';
 
+// TODO: * only update bits after 1/fps seconds of previous update
+//       * implement edit/delete signal
+//       * implement fade decyphered/not-decyphered
+//       * implement little-endian
+//       * implement signed
+
 
 // WebSocket hook for raw CAN frames
 function useRawCANWebSocket(onFrame) {
