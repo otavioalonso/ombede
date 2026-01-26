@@ -264,6 +264,11 @@ export default function Signals() {
   const [lexiconFile, setLexiconFile] = useState('lexicon.json');
   const [editingBitRange, setEditingBitRange] = useState(null); // { signal, frameId } when editing bit range
   
+  // Undo/Redo state
+  const [undoStack, setUndoStack] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
+  const isUndoRedoRef = useRef(false); // Flag to prevent recording during undo/redo
+  
   // Signal graph state
   const [graphSignal, setGraphSignal] = useState(null);
   const [graphFrameId, setGraphFrameId] = useState(null);
@@ -271,6 +276,77 @@ export default function Signals() {
 
   // Global hovered signal state
   const [hoveredSignal, setHoveredSignal] = useState(null);
+
+  // Push current state to undo stack before making changes
+  const pushToUndoStack = useCallback((currentSignals) => {
+    if (isUndoRedoRef.current) return; // Don't record during undo/redo
+    setUndoStack(prev => [...prev.slice(-49), JSON.parse(JSON.stringify(currentSignals))]); // Keep last 50 states
+    setRedoStack([]); // Clear redo stack on new action
+  }, []);
+
+  // Undo last action
+  const handleUndo = useCallback(() => {
+    if (undoStack.length === 0) return;
+    
+    isUndoRedoRef.current = true;
+    const previousState = undoStack[undoStack.length - 1];
+    setRedoStack(prev => [...prev, JSON.parse(JSON.stringify(signals))]);
+    setUndoStack(prev => prev.slice(0, -1));
+    setSignals(previousState);
+    
+    // Sync with server
+    syncSignalsToServer(previousState);
+    isUndoRedoRef.current = false;
+  }, [undoStack, signals]);
+
+  // Redo last undone action
+  const handleRedo = useCallback(() => {
+    if (redoStack.length === 0) return;
+    
+    isUndoRedoRef.current = true;
+    const nextState = redoStack[redoStack.length - 1];
+    setUndoStack(prev => [...prev, JSON.parse(JSON.stringify(signals))]);
+    setRedoStack(prev => prev.slice(0, -1));
+    setSignals(nextState);
+    
+    // Sync with server
+    syncSignalsToServer(nextState);
+    isUndoRedoRef.current = false;
+  }, [redoStack, signals]);
+
+  // Sync signals state to server (rebuild the lexicon file)
+  const syncSignalsToServer = async (signalsState) => {
+    try {
+      await fetch(`/api/signals/sync?file=${encodeURIComponent(lexiconFile)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ signals: signalsState }),
+      });
+    } catch (error) {
+      console.error('Error syncing signals:', error);
+    }
+  };
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo]);
 
   // Update current time
   useEffect(() => {
@@ -414,6 +490,7 @@ export default function Signals() {
       
       if (response.ok) {
         const savedSignal = { ...newSignal, frameId };
+        pushToUndoStack(signals); // Save state before change
         setSignals(prev => [...prev, savedSignal]);
         setGraphSignal(savedSignal);
         setGraphFrameId(frameId);
@@ -475,6 +552,7 @@ export default function Signals() {
           bit_length: bitLength,
         };
         
+        pushToUndoStack(signals); // Save state before change
         setSignals(prev => prev.map(s => 
           s.name === oldSignal.name && s.frameId === oldFrameId ? updatedSignal : s
         ));
@@ -501,6 +579,7 @@ export default function Signals() {
       });
       
       if (response.ok) {
+        pushToUndoStack(signals); // Save state before change
         setSignals(prev => prev.filter(s => !(s.name === signal.name && s.frameId === frameId)));
         setGraphSignal(null);
         setGraphFrameId(null);
@@ -541,6 +620,7 @@ export default function Signals() {
           }
         }
         
+        pushToUndoStack(signals); // Save state before change
         setSignals(prev => prev.map(s => 
           s.name === graphSignal.name && s.frameId === graphFrameId
             ? { ...s, ...updatedSignal }
@@ -561,6 +641,24 @@ export default function Signals() {
       <header className="signals-header">
         <h1>CAN Signal Analyzer</h1>
         <div className="controls">
+          <div className="undo-redo-buttons">
+            <button 
+              className="btn-undo" 
+              onClick={handleUndo} 
+              disabled={undoStack.length === 0}
+              title="Undo (Ctrl+Z)"
+            >
+              ↶
+            </button>
+            <button 
+              className="btn-redo" 
+              onClick={handleRedo} 
+              disabled={redoStack.length === 0}
+              title="Redo (Ctrl+Shift+Z)"
+            >
+              ↷
+            </button>
+          </div>
           <label>
             <input 
               type="checkbox" 

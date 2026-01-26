@@ -191,6 +191,49 @@ function createApi(defaultLexicon) {
                     res.end(JSON.stringify({ error: 'Failed to delete signal' }));
                 }
             });
+        } else if (pathname === '/api/signals/sync' && req.method === 'POST') {
+            // Sync entire signals state (for undo/redo)
+            let body = '';
+            req.on('data', chunk => body += chunk);
+            req.on('end', () => {
+                try {
+                    const { signals } = JSON.parse(body);
+
+                    // Rebuild the lexicon structure from flat signals array
+                    const messagesMap = new Map();
+                    
+                    signals.forEach(signal => {
+                        const { frameId, messageName, ...signalData } = signal;
+                        
+                        if (!messagesMap.has(frameId)) {
+                            messagesMap.set(frameId, {
+                                id: frameId,
+                                is_extended_frame: false,
+                                is_fd: false,
+                                name: messageName || `message_${frameId.toString(16)}`,
+                                signals: []
+                            });
+                        }
+                        
+                        messagesMap.get(frameId).signals.push(signalData);
+                    });
+                    
+                    // Convert to array and sort by ID
+                    const data = {
+                        messages: Array.from(messagesMap.values()).sort((a, b) => a.id - b.id)
+                    };
+                    
+                    // Write back
+                    fs.writeFileSync(lexicon, JSON.stringify(data, null, 4));
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true }));
+                } catch (error) {
+                    console.error('Error syncing signals:', error);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to sync signals' }));
+                }
+            });
         } else {
             res.writeHead(404);
             res.end();

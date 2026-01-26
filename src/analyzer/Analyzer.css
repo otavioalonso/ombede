@@ -72,6 +72,39 @@
   margin-right: 50px;
 }
 
+.undo-redo-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btn-undo,
+.btn-redo {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(99, 179, 237, 0.3);
+  border-radius: 6px;
+  background: rgba(26, 32, 44, 0.8);
+  color: #63b3ed;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-undo:hover:not(:disabled),
+.btn-redo:hover:not(:disabled) {
+  background: rgba(99, 179, 237, 0.2);
+  border-color: #63b3ed;
+}
+
+.btn-undo:disabled,
+.btn-redo:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .controls label {
   display: flex;
   align-items: center;
