@@ -1,16 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 
 import SignalGraph from './SignalGraph';
-import SignalModal from './SignalModal';
 
 import { bigEndianStartBit } from '../../server/utils.js';
 
 import './Analyzer.css';
 
-// TODO: * only update bits after 1/fps seconds of previous update
-//       * implement edit/delete signal
-//       * implement fade decyphered/not-decyphered
-//       * implement little-endian
+// TODO: * implement little-endian
 //       * implement signed
 
 
@@ -107,6 +103,8 @@ function CANMessageRow({
   bytes, 
   lastChangeTime,
   fadeEnabled,
+  fadeDecyphered,
+  fadeUndecyphered,
   currentTime,
   selectedBits,
   onBitMouseDown,
@@ -118,6 +116,17 @@ function CANMessageRow({
 }) {
   const bits = bytesToBits(bytes);
   
+  // Find signals that apply to this frame
+  const frameSignals = signals.filter(s => s.frameId === frameId);
+  
+  // Helper to check if a bit index is covered by any signal
+  const isBitDecyphered = (bitIndex) => {
+    return frameSignals.some(s => {
+      const start = bigEndianStartBit(s.start_bit);
+      return bitIndex >= start && bitIndex < start + s.bit_length;
+    });
+  };
+
   const fadedBits = new Set(lastChangeTime.map((time, i) => ({i:i, time:time})).filter(({i,time}) => {
     // Fade if some signal is being hovered over and it's not this one 
     if (hoveredSignal) {
@@ -126,6 +135,11 @@ function CANMessageRow({
         return (i < start) || (i >= start + hoveredSignal.bit_length);
       } else return true;
     }
+    
+    // Fade decyphered/undecyphered bits
+    const decyphered = isBitDecyphered(i);
+    if (fadeDecyphered && decyphered) return true;
+    if (fadeUndecyphered && !decyphered) return true;
     
     // Fade if fading by time is enabled 
     if (fadeEnabled) return (currentTime - time) > 1000;
@@ -142,9 +156,6 @@ function CANMessageRow({
       bits: bits.slice(i * 8, (i + 1) * 8),
     });
   }
-
-  // Find signals that apply to this frame and decode their values
-  const frameSignals = signals.filter(s => s.frameId === frameId);
 
   // Format signal value for display
   const formatValue = (value, signal) => {
@@ -196,20 +207,22 @@ function CANMessageRow({
 export default function Signals() {
   // State for all received frames: Map<frameId, { bytes, lastChangeTime[] }>
   const [frames, setFrames] = useState(new Map());
-  const [fadeEnabled, setFadeEnabled] = useState(false); // enable fading
+  const [fadeEnabled, setFadeEnabled] = useState(false);
+  const [fadeDecyphered, setFadeDecyphered] = useState(false);
+  const [fadeUndecyphered, setFadeUndecyphered] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [isSelecting, setIsSelecting] = useState(false);
-  const [selectionStart, setSelectionStart] = useState(null); // { frameId, bitIndex }
+  const [selectionStart, setSelectionStart] = useState(null);
   const [selectionEnd, setSelectionEnd] = useState(null);
-  const [selectedBits, setSelectedBits] = useState(new Map()); // Map<frameId, Set<bitIndex>>
-  const [showModal, setShowModal] = useState(false);
+  const [selectedBits, setSelectedBits] = useState(new Map());
   const [signals, setSignals] = useState([]);
   const [lexiconFile, setLexiconFile] = useState('lexicon.json');
+  const [editingBitRange, setEditingBitRange] = useState(null); // { signal, frameId } when editing bit range
   
   // Signal graph state
   const [graphSignal, setGraphSignal] = useState(null);
   const [graphFrameId, setGraphFrameId] = useState(null);
-  const signalHistoryRef = useRef(new Map()); // Map<"frameId:signalName", Array<{time, value}>>
+  const signalHistoryRef = useRef(new Map());
 
   // Global hovered signal state
   const [hoveredSignal, setHoveredSignal] = useState(null);
@@ -242,7 +255,13 @@ export default function Signals() {
     const now = Date.now();
     
     // Update signal history for any known signals on this frame
-    signals.filter(s => s.frameId === frame.id).forEach(signal => {
+    // Also include the currently open graph signal to show data immediately
+    const signalsForFrame = signals.filter(s => s.frameId === frame.id);
+    if (graphSignal && graphFrameId === frame.id && !signalsForFrame.find(s => s.name === graphSignal.name)) {
+      signalsForFrame.push(graphSignal);
+    }
+    
+    signalsForFrame.forEach(signal => {
       const value = decodeSignal(frame.bytes, signal);
       if (value !== null) {
         const key = `${frame.id}:${signal.name}`;
@@ -281,7 +300,7 @@ export default function Signals() {
       }
       return next;
     });
-  }, [signals]);
+  }, [signals, graphSignal, graphFrameId]);
 
   useRawCANWebSocket(handleFrame);
 
@@ -312,55 +331,181 @@ export default function Signals() {
 
   const handleMouseUp = () => {
     if (isSelecting && selectionStart && selectionEnd) {
-      // Show modal to define the signal
-      setShowModal(true);
+      // Check if we're editing an existing signal's bit range
+      if (editingBitRange) {
+        handleUpdateBitRange();
+      } else {
+        // Create new signal and open modal
+        handleCreateSignal();
+      }
     }
     setIsSelecting(false);
   };
 
-  const handleSignalClick = (signal, frameId) => {
-    setGraphSignal(signal);
-    setGraphFrameId(frameId);
-  };
-
-  const handleCloseGraph = () => {
-    setGraphSignal(null);
-    setGraphFrameId(null);
-  };
-
-  const handleSaveSignal = async (signal) => {
-    if (!selectionStart) return;
+  // Create a new signal and open the graph modal
+  const handleCreateSignal = async () => {
+    const bitLength = Math.abs(selectionEnd.bitIndex - selectionStart.bitIndex) + 1;
+    const actualStartBit = Math.min(selectionStart.bitIndex, selectionEnd.bitIndex);
+    const frameId = selectionStart.frameId;
+    
+    const newSignal = {
+      name: `signal_${frameId}_${actualStartBit}`,
+      start_bit: bigEndianStartBit(actualStartBit),
+      bit_length: bitLength,
+      factor: 1,
+      offset: 0,
+      unit: '',
+      is_big_endian: true,
+      is_float: false,
+      is_signed: false,
+    };
     
     try {
       const response = await fetch(`/api/signals?file=${encodeURIComponent(lexiconFile)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frameId, signal: newSignal }),
+      });
+      
+      if (response.ok) {
+        const savedSignal = { ...newSignal, frameId };
+        setSignals(prev => [...prev, savedSignal]);
+        setGraphSignal(savedSignal);
+        setGraphFrameId(frameId);
+        setSelectedBits(new Map());
+        setSelectionStart(null);
+        setSelectionEnd(null);
+      }
+    } catch (error) {
+      console.error('Error creating signal:', error);
+    }
+  };
+
+  // Open graph modal when clicking on existing signal
+  const handleSignalClick = (signal, frameId) => {
+    setGraphSignal(signal);
+    setGraphFrameId(frameId);
+  };
+
+  // Close graph modal
+  const handleCloseGraph = () => {
+    setGraphSignal(null);
+    setGraphFrameId(null);
+    setEditingBitRange(null);
+  };
+
+  // Start editing bit range - close modal and let user select new range
+  const handleEditBitRange = (signal, frameId) => {
+    setGraphSignal(null);
+    setGraphFrameId(null);
+    setEditingBitRange({ signal, frameId });
+  };
+
+  // Update bit range after user selects new range
+  const handleUpdateBitRange = async () => {
+    if (!editingBitRange || !selectionStart || !selectionEnd) return;
+    
+    const { signal: oldSignal, frameId: oldFrameId } = editingBitRange;
+    const bitLength = Math.abs(selectionEnd.bitIndex - selectionStart.bitIndex) + 1;
+    const actualStartBit = Math.min(selectionStart.bitIndex, selectionEnd.bitIndex);
+    
+    try {
+      const response = await fetch(`/api/signals?file=${encodeURIComponent(lexiconFile)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          frameId: selectionStart.frameId,
-          signal,
+          frameId: oldFrameId,
+          signalName: oldSignal.name,
+          updates: {
+            start_bit: bigEndianStartBit(actualStartBit),
+            bit_length: bitLength,
+          },
         }),
       });
       
       if (response.ok) {
-        // Add to local state
-        setSignals(prev => [...prev, { ...signal, frameId: selectionStart.frameId }]);
-        setShowModal(false);
+        const updatedSignal = {
+          ...oldSignal,
+          start_bit: bigEndianStartBit(actualStartBit),
+          bit_length: bitLength,
+        };
+        
+        setSignals(prev => prev.map(s => 
+          s.name === oldSignal.name && s.frameId === oldFrameId ? updatedSignal : s
+        ));
+        
         setSelectedBits(new Map());
         setSelectionStart(null);
         setSelectionEnd(null);
-      } else {
-        console.error('Failed to save signal');
+        setGraphSignal(updatedSignal);
+        setGraphFrameId(oldFrameId);
+        setEditingBitRange(null);
       }
     } catch (error) {
-      console.error('Error saving signal:', error);
+      console.error('Error updating bit range:', error);
     }
   };
 
-  const handleCancelModal = () => {
-    setShowModal(false);
-    setSelectedBits(new Map());
-    setSelectionStart(null);
-    setSelectionEnd(null);
+  // Delete signal
+  const handleDeleteSignal = async (signal, frameId) => {
+    try {
+      const response = await fetch(`/api/signals?file=${encodeURIComponent(lexiconFile)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frameId, signalName: signal.name }),
+      });
+      
+      if (response.ok) {
+        setSignals(prev => prev.filter(s => !(s.name === signal.name && s.frameId === frameId)));
+        setGraphSignal(null);
+        setGraphFrameId(null);
+        signalHistoryRef.current.delete(`${frameId}:${signal.name}`);
+      }
+    } catch (error) {
+      console.error('Error deleting signal:', error);
+    }
+  };
+
+  // Update signal (name, factor, offset, unit)
+  const handleUpdateSignal = async (updatedSignal) => {
+    try {
+      const response = await fetch(`/api/signals?file=${encodeURIComponent(lexiconFile)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          frameId: graphFrameId,
+          signalName: graphSignal.name,
+          updates: {
+            name: updatedSignal.name,
+            factor: updatedSignal.factor,
+            offset: updatedSignal.offset,
+            unit: updatedSignal.unit,
+          },
+        }),
+      });
+      
+      if (response.ok) {
+        // Update history key if name changed
+        if (updatedSignal.name !== graphSignal.name) {
+          const oldKey = `${graphFrameId}:${graphSignal.name}`;
+          const newKey = `${graphFrameId}:${updatedSignal.name}`;
+          const history = signalHistoryRef.current.get(oldKey);
+          if (history) {
+            signalHistoryRef.current.set(newKey, history);
+            signalHistoryRef.current.delete(oldKey);
+          }
+        }
+        
+        setSignals(prev => prev.map(s => 
+          s.name === graphSignal.name && s.frameId === graphFrameId
+            ? { ...s, ...updatedSignal }
+            : s
+        ));
+        setGraphSignal({ ...graphSignal, ...updatedSignal });
+      }
+    } catch (error) {
+      console.error('Error updating signal:', error);
+    }
   };
 
   // Sort frames by ID
@@ -380,6 +525,22 @@ export default function Signals() {
             Fade inactive bits
           </label>
           <label>
+            <input 
+              type="checkbox" 
+              checked={fadeDecyphered}
+              onChange={(e) => setFadeDecyphered(e.target.checked)}
+            />
+            Fade decyphered bits
+          </label>
+          <label>
+            <input 
+              type="checkbox" 
+              checked={fadeUndecyphered}
+              onChange={(e) => setFadeUndecyphered(e.target.checked)}
+            />
+            Fade undecyphered bits
+          </label>
+          <label>
             File:
             <input 
               type="text" 
@@ -390,6 +551,12 @@ export default function Signals() {
           </label>
         </div>
       </header>
+      {editingBitRange && (
+        <div className="edit-mode-banner">
+          Select a new bit range for "{editingBitRange.signal.name}"
+          <button onClick={() => setEditingBitRange(null)}>Cancel</button>
+        </div>
+      )}
       <div className="signals-list">
         {sortedFrames.map(([frameId, frameData]) => {
           return (
@@ -399,6 +566,8 @@ export default function Signals() {
               bytes={frameData.bytes}
               lastChangeTime={frameData.lastChangeTime}
               fadeEnabled={fadeEnabled}
+              fadeDecyphered={fadeDecyphered}
+              fadeUndecyphered={fadeUndecyphered}
               currentTime={currentTime}
               selectedBits={selectedBits}
               onBitMouseDown={handleBitMouseDown}
@@ -411,21 +580,15 @@ export default function Signals() {
           );
         })}
       </div>
-      {showModal && selectionStart && selectionEnd && (
-        <SignalModal
-          frameId={selectionStart.frameId}
-          startBit={selectionStart.bitIndex}
-          endBit={selectionEnd.bitIndex}
-          onSave={handleSaveSignal}
-          onCancel={handleCancelModal}
-        />
-      )}
       {graphSignal && graphFrameId && (
         <SignalGraph
           signal={graphSignal}
           frameId={graphFrameId}
           dataHistory={signalHistoryRef.current.get(`${graphFrameId}:${graphSignal.name}`) || []}
           onClose={handleCloseGraph}
+          onEditBitRange={handleEditBitRange}
+          onDelete={handleDeleteSignal}
+          onUpdate={handleUpdateSignal}
         />
       )}
     </div>

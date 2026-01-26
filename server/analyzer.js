@@ -44,7 +44,7 @@ function createApi(defaultLexicon) {
     return http.createServer((req, res) => {
         // Enable CORS
         res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
         if (req.method === 'OPTIONS') {
@@ -115,6 +115,80 @@ function createApi(defaultLexicon) {
                     console.error('Error saving signal:', error);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: 'Failed to save signal' }));
+                }
+            });
+        } else if (pathname === '/api/signals' && req.method === 'PUT') {
+            // Update an existing signal
+            let body = '';
+            req.on('data', chunk => body += chunk);
+            req.on('end', () => {
+                try {
+                    const { frameId, signalName, updates } = JSON.parse(body);
+
+                    const data = JSON.parse(fs.readFileSync(lexicon, 'utf8'));
+
+                    // Find the message and signal
+                    const message = data.messages.find(m => m.id === frameId);
+                    if (!message || !message.signals) {
+                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Signal not found' }));
+                        return;
+                    }
+
+                    const signal = message.signals.find(s => s.name === signalName);
+                    if (!signal) {
+                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Signal not found' }));
+                        return;
+                    }
+
+                    // Update the signal properties
+                    Object.assign(signal, updates);
+
+                    // Write back
+                    fs.writeFileSync(lexicon, JSON.stringify(data, null, 4));
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true }));
+                } catch (error) {
+                    console.error('Error updating signal:', error);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to update signal' }));
+                }
+            });
+        } else if (pathname === '/api/signals' && req.method === 'DELETE') {
+            // Delete a signal
+            let body = '';
+            req.on('data', chunk => body += chunk);
+            req.on('end', () => {
+                try {
+                    const { frameId, signalName } = JSON.parse(body);
+
+                    const data = JSON.parse(fs.readFileSync(lexicon, 'utf8'));
+
+                    // Find the message
+                    const message = data.messages.find(m => m.id === frameId);
+                    if (!message || !message.signals) {
+                        res.writeHead(404, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Signal not found' }));
+                        return;
+                    }
+
+                    // Remove the signal
+                    message.signals = message.signals.filter(s => s.name !== signalName);
+
+                    // If message has no more signals, optionally remove it (or keep it)
+                    // For now, we'll keep the message even if it has no signals
+
+                    // Write back
+                    fs.writeFileSync(lexicon, JSON.stringify(data, null, 4));
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true }));
+                } catch (error) {
+                    console.error('Error deleting signal:', error);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to delete signal' }));
                 }
             });
         } else {

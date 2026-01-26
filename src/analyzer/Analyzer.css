@@ -24,6 +24,47 @@
   /* color: #2b6cb0; */
 }
 
+.edit-mode-banner {
+  background: linear-gradient(135deg, rgba(99, 179, 237, 0.2) 0%, rgba(79, 209, 197, 0.2) 100%);
+  border: 1px solid rgba(99, 179, 237, 0.4);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #63b3ed;
+  animation: pulse 2s ease-in-out infinite;
+  width: 400px;
+}
+
+.edit-mode-banner button {
+  padding: 0.3rem 0.8rem;
+  background: rgba(252, 129, 129, 0.2);
+  color: #fc8181;
+  border: 1px solid rgba(252, 129, 129, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  float: right;
+}
+
+.edit-mode-banner button:hover {
+  background: rgba(252, 129, 129, 0.3);
+  border-color: #fc8181;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 .controls {
   display: flex;
   gap: 2rem;

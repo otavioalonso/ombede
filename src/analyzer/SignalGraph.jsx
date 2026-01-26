@@ -2,15 +2,48 @@ import { useEffect, useState, useRef } from 'react';
 
 import { bigEndianStartBit } from '../../server/utils';
 
-import './SignalModal.css';
 import './SignalGraph.css';
 
 
-// Signal Graph Modal component
-export default function SignalGraph({ signal, frameId, dataHistory, onClose }) {
+// Unified Signal Graph Modal - same UI for creating and editing signals
+export default function SignalGraph({ signal, frameId, dataHistory, onClose, onEditBitRange, onDelete, onUpdate }) {
   const canvasRef = useRef(null);
-  const [timeWindow, setTimeWindow] = useState(10); // seconds to show
+  const [timeWindow, setTimeWindow] = useState(10);
+  const [localName, setLocalName] = useState(signal.name || '');
+  const [localFactor, setLocalFactor] = useState(signal.factor || 1);
+  const [localOffset, setLocalOffset] = useState(signal.offset || 0);
+  const [localUnit, setLocalUnit] = useState(signal.unit || '');
 
+  // Update signal when any field changes
+  const handleNameChange = (value) => {
+    setLocalName(value);
+    if (value.trim()) {
+      onUpdate({ ...signal, name: value, factor: localFactor, offset: localOffset, unit: localUnit });
+    }
+  };
+
+  const handleFactorChange = (value) => {
+    const newFactor = parseFloat(value) || 1;
+    setLocalFactor(newFactor);
+    onUpdate({ ...signal, name: localName, factor: newFactor, offset: localOffset, unit: localUnit });
+  };
+
+  const handleOffsetChange = (value) => {
+    const newOffset = parseFloat(value) || 0;
+    setLocalOffset(newOffset);
+    onUpdate({ ...signal, name: localName, factor: localFactor, offset: newOffset, unit: localUnit });
+  };
+
+  const handleUnitChange = (value) => {
+    setLocalUnit(value);
+    onUpdate({ ...signal, name: localName, factor: localFactor, offset: localOffset, unit: value });
+  };
+
+  const handleDelete = () => {
+    onDelete(signal, frameId);
+  };
+
+  // Canvas drawing effect
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -34,9 +67,16 @@ export default function SignalGraph({ signal, frameId, dataHistory, onClose }) {
     // Get data for this signal
     const now = Date.now();
     const minTime = now - timeWindow * 1000;
+    
+    // Recalculate values with current factor/offset
     const data = dataHistory
       .filter(d => d.time >= minTime)
-      .map(d => ({ time: d.time, value: d.value }));
+      .map(d => {
+        // Reverse original transformation and apply new one
+        const rawValue = (d.value - (signal.offset || 0)) / (signal.factor || 1);
+        const newValue = rawValue * localFactor + localOffset;
+        return { time: d.time, value: newValue };
+      });
 
     if (data.length === 0) {
       ctx.fillStyle = '#718096';
@@ -105,31 +145,27 @@ export default function SignalGraph({ signal, frameId, dataHistory, onClose }) {
     });
     ctx.stroke();
 
-    // Draw points
-    // ctx.fillStyle = '#4fd1c5';
-    // data.forEach(d => {
-    //   const x = padding.left + ((d.time - minTime) / (timeWindow * 1000)) * graphWidth;
-    //   const y = padding.top + ((maxVal - d.value) / (maxVal - minVal)) * graphHeight;
-    //   ctx.beginPath();
-    //   ctx.arc(x, y, 3, 0, Math.PI * 2);
-    //   ctx.fill();
-    // });
-
     // Current value
     const lastValue = data[data.length - 1]?.value;
     if (lastValue !== undefined) {
       ctx.fillStyle = '#68d391';
       ctx.font = 'bold 24px JetBrains Mono, monospace';
       ctx.textAlign = 'right';
-      ctx.fillText(`${lastValue.toFixed(2)}${signal.unit || ''}`, width - padding.right, padding.top);
+      ctx.fillText(`${lastValue.toFixed(2)}${localUnit}`, width - padding.right, padding.top);
     }
-  }, [dataHistory, timeWindow, signal]);
+  }, [dataHistory, timeWindow, signal, localFactor, localOffset, localUnit]);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="graph-modal" onClick={e => e.stopPropagation()}>
         <div className="graph-header">
-          <h2>{signal.name}</h2>
+          <input 
+            type="text"
+            className="signal-name-input"
+            value={localName}
+            onChange={(e) => handleNameChange(e.target.value)}
+            placeholder="Signal name..."
+          />
           <div className="graph-controls">
             <label>
               Time:
@@ -145,8 +181,47 @@ export default function SignalGraph({ signal, frameId, dataHistory, onClose }) {
         </div>
         <div className="graph-info">
           Frame: 0x{frameId.toString(16).toUpperCase().padStart(3, '0')} | 
-          Bits: {bigEndianStartBit(signal.start_bit)} - {bigEndianStartBit(signal.start_bit) + signal.bit_length - 1} |
-          Factor: {signal.factor} | Offset: {signal.offset}
+          Bits: {bigEndianStartBit(signal.start_bit)} - {bigEndianStartBit(signal.start_bit) + signal.bit_length - 1}
+        </div>
+        <div className="graph-edit-controls">
+          <div className="edit-inputs">
+            <label>
+              Factor:
+              <input 
+                type="number" 
+                step="any"
+                value={localFactor} 
+                onChange={(e) => handleFactorChange(e.target.value)}
+              />
+            </label>
+            <label>
+              Offset:
+              <input 
+                type="number" 
+                step="any"
+                value={localOffset} 
+                onChange={(e) => handleOffsetChange(e.target.value)}
+              />
+            </label>
+            <label>
+              Unit:
+              <input 
+                type="text"
+                value={localUnit} 
+                onChange={(e) => handleUnitChange(e.target.value)}
+                placeholder="e.g., km/h"
+                style={{ width: '120px' }}
+              />
+            </label>
+          </div>
+          <div className="edit-buttons">
+            <button className="btn-edit" onClick={() => onEditBitRange(signal, frameId)}>
+              Edit Bit Range
+            </button>
+            <button className="btn-delete" onClick={handleDelete}>
+              Delete
+            </button>
+          </div>
         </div>
         <canvas ref={canvasRef} className="signal-canvas" />
       </div>
