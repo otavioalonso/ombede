@@ -218,6 +218,7 @@
   border-radius: 0px;
   cursor:pointer;
   flex-shrink: 0;
+  transition: border-color 0.15s ease;
 }
 
 .bit-square:hover {
@@ -233,6 +234,20 @@
 .bit-square.filled {
   background: #000;
   border-color: #fff;
+}
+
+.bit-square.has-signal {
+  border-width: 1px;
+  border-color: var(--signal-color) !important;
+  box-shadow: 0 0 3px var(--signal-color);
+}
+
+.bit-square.has-signal.empty {
+  /* background: color-mix(in srgb, var(--signal-color) 15%, #fff); */
+}
+
+.bit-square.has-signal.filled {
+  /* background: color-mix(in srgb, var(--signal-color) 40%, #000); */
 }
 
 .bit-square.selected {
@@ -258,13 +273,22 @@
   gap: 0.4rem;
   align-items: center;
   border: 1px solid #ccc;
+  border-left: 3px solid var(--signal-color, #ccc);
   transition: none;
 }
 
 .signal-badge:hover {
   background: #e2e8f0;
   border-color: #cbd5e0;
+  border-left-color: var(--signal-color, #cbd5e0);
   color: #222;
+}
+
+.signal-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .signal-name {

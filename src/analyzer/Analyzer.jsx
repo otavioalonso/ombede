@@ -9,6 +9,31 @@ import './Analyzer.css';
 // TODO: * implement little-endian
 //       * implement signed
 
+// Color palette for signals - visually distinct colors
+const SIGNAL_COLORS = [
+  '#f56565', // red
+  '#4299e1', // blue
+  '#48bb78', // green
+  '#ed64a6', // pink
+  '#ecc94b', // yellow
+  '#38b2ac', // teal
+  '#667eea', // indigo
+  '#ed8936', // orange
+  '#9f7aea', // purple
+  '#fc8181', // light red
+  '#f6ad55', // light orange
+  '#68d391', // light green
+  '#63b3ed', // light blue
+  '#b794f4', // light purple
+  '#f687b3', // light pink
+];
+
+// Get a consistent color for a signal based on its name
+function getSignalColor(signalName, index) {
+  // Use index for consistent coloring within a frame
+  return SIGNAL_COLORS[index % SIGNAL_COLORS.length];
+}
+
 
 // WebSocket hook for raw CAN frames
 function useRawCANWebSocket(onFrame) {
@@ -61,13 +86,21 @@ function decodeSignal(bytes, signal) {
 }
 
 // Single bit square component
-function BitSquare({ value, isSelected, isFaded, onMouseDown, onMouseEnter }) {
+function BitSquare({ value, isSelected, isFaded, signalColor, onMouseDown, onMouseEnter }) {
   let className = `bit-square ${value ? 'filled' : 'empty'}`;
   if (isSelected) className += ' selected';
   if (isFaded) className += ' faded';
+  if (signalColor) className += ' has-signal';
+  
+  const style = signalColor ? { 
+    '--signal-color': signalColor,
+    borderColor: signalColor,
+  } : {};
+  
   return (
     <div
       className={className}
+      style={style}
       onMouseDown={onMouseDown}
       onMouseEnter={onMouseEnter}
     />
@@ -75,7 +108,7 @@ function BitSquare({ value, isSelected, isFaded, onMouseDown, onMouseEnter }) {
 }
 
 // Byte group component (8 bits)
-function ByteGroup({ byteIndex, bits, selectedBits, fadedBits, onBitMouseDown, onBitMouseEnter }) {
+function ByteGroup({ byteIndex, bits, selectedBits, fadedBits, signalColorMap, onBitMouseDown, onBitMouseEnter }) {
   return (
     <div className="byte-group">
       <div className="byte-bits">
@@ -87,6 +120,7 @@ function ByteGroup({ byteIndex, bits, selectedBits, fadedBits, onBitMouseDown, o
               value={bit === '1'}
               isSelected={selectedBits.has(gbi)}
               isFaded={fadedBits.has(gbi)}
+              signalColor={signalColorMap.get(gbi)}
               onMouseDown={() => onBitMouseDown(gbi)}
               onMouseEnter={() => onBitMouseEnter(gbi)}
             />
@@ -119,12 +153,19 @@ function CANMessageRow({
   // Find signals that apply to this frame
   const frameSignals = signals.filter(s => s.frameId === frameId);
   
+  // Build a map of bit index -> signal color
+  const signalColorMap = new Map();
+  frameSignals.forEach((s, signalIndex) => {
+    const color = getSignalColor(s.name, signalIndex);
+    const start = bigEndianStartBit(s.start_bit);
+    for (let i = 0; i < s.bit_length; i++) {
+      signalColorMap.set(start + i, color);
+    }
+  });
+  
   // Helper to check if a bit index is covered by any signal
   const isBitDecyphered = (bitIndex) => {
-    return frameSignals.some(s => {
-      const start = bigEndianStartBit(s.start_bit);
-      return bitIndex >= start && bitIndex < start + s.bit_length;
-    });
+    return signalColorMap.has(bitIndex);
   };
 
   const fadedBits = new Set(lastChangeTime.map((time, i) => ({i:i, time:time})).filter(({i,time}) => {
@@ -177,6 +218,7 @@ function CANMessageRow({
             bits={group.bits}
             selectedBits={selectedBits.get(frameId) || new Set()}
             fadedBits={fadedBits}
+            signalColorMap={signalColorMap}
             onBitMouseDown={(bitIdx) => onBitMouseDown(frameId, bitIdx)}
             onBitMouseEnter={(bitIdx) => onBitMouseEnter(frameId, bitIdx)}
           />
@@ -185,15 +227,18 @@ function CANMessageRow({
       <div className="frame-signals">
         {frameSignals.map((s, i) => {
           const value = decodeSignal(bytes, s);
+          const color = getSignalColor(s.name, i);
           return (
             <span 
               key={i} 
               className="signal-badge" 
+              style={{ '--signal-color': color }}
               title={`Click to see graph. Bits ${bigEndianStartBit(s.start_bit)}-${bigEndianStartBit(s.start_bit) + s.bit_length - 1}`}
               onMouseEnter={() => { setHoveredSignal({ ...s, frameId }); }}
               onMouseLeave={() => { setHoveredSignal(null); }}
               onClick={() => onSignalClick(s, frameId)}
             >
+              <span className="signal-color-dot" style={{ backgroundColor: color }} />
               <span className="signal-name">{s.name}</span>
               <span className="signal-value">{formatValue(value, s)} {s.unit || ''}</span>
             </span>
