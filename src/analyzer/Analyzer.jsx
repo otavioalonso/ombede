@@ -275,6 +275,14 @@ export default function Signals() {
   // Global hovered signal state
   const [hoveredSignal, setHoveredSignal] = useState(null);
 
+  // DBC import state
+  const [dbcImportModal, setDbcImportModal] = useState(false);
+  const [dbcContent, setDbcContent] = useState(null);
+  const [dbcFileName, setDbcFileName] = useState('');
+  const [dbcImportMode, setDbcImportMode] = useState('merge');
+  const [dbcImportStatus, setDbcImportStatus] = useState(null);
+  const fileInputRef = useRef(null);
+
   // Push current state to undo stack before making changes
   const pushToUndoStack = useCallback((currentSignals) => {
     if (isUndoRedoRef.current) return; // Don't record during undo/redo
@@ -631,6 +639,91 @@ export default function Signals() {
     }
   };
 
+  // Handle DBC file selection
+  const handleDbcFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setDbcFileName(file.name);
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setDbcContent(event.target.result);
+      setDbcImportModal(true);
+      setDbcImportStatus(null);
+    };
+    reader.readAsText(file);
+    
+    // Reset input so same file can be selected again
+    e.target.value = '';
+  };
+
+  // Handle DBC import
+  const handleDbcImport = async () => {
+    if (!dbcContent) return;
+    
+    setDbcImportStatus({ loading: true });
+    
+    // Get list of currently detected frame IDs
+    const detectedFrameIds = Array.from(frames.keys());
+    
+    try {
+      const response = await fetch(`/api/signals/import-dbc?file=${encodeURIComponent(lexiconFile)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: dbcContent,
+          mode: dbcImportMode,
+          detectedFrameIds,
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        pushToUndoStack(signals); // Save state before change
+        
+        // Reload signals from server
+        const signalsResponse = await fetch(`/api/signals?file=${encodeURIComponent(lexiconFile)}`);
+        const data = await signalsResponse.json();
+        
+        const allSignals = [];
+        data.messages?.forEach(msg => {
+          msg.signals?.forEach(sig => {
+            allSignals.push({ ...sig, frameId: msg.id, messageName: msg.name });
+          });
+        });
+        setSignals(allSignals);
+        
+        setDbcImportStatus({
+          success: true,
+          message: `Imported ${result.imported} messages, ${result.signals} signals total`,
+        });
+        
+        // Close modal after a short delay
+        setTimeout(() => {
+          setDbcImportModal(false);
+          setDbcContent(null);
+          setDbcFileName('');
+          setDbcImportStatus(null);
+        }, 2000);
+      } else {
+        setDbcImportStatus({ error: result.error });
+      }
+    } catch (error) {
+      console.error('Error importing DBC:', error);
+      setDbcImportStatus({ error: 'Failed to import DBC file' });
+    }
+  };
+
+  // Close DBC import modal
+  const handleCloseDbcModal = () => {
+    setDbcImportModal(false);
+    setDbcContent(null);
+    setDbcFileName('');
+    setDbcImportStatus(null);
+  };
+
   // Sort frames by ID
   const sortedFrames = Array.from(frames.entries()).sort((a, b) => a[0] - b[0]);
 
@@ -688,6 +781,20 @@ export default function Signals() {
           >
             Colors
           </button>
+          <button 
+            className="btn-import"
+            onClick={() => fileInputRef.current?.click()}
+            title="Import signals from a DBC file"
+          >
+            <i className="fa-solid fa-file-import" /> Import DBC
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".dbc"
+            onChange={handleDbcFileSelect}
+            style={{ display: 'none' }}
+          />
           <div className="file-input">
             <span>File:</span>
             <input 
@@ -751,6 +858,77 @@ export default function Signals() {
           onDelete={handleDeleteSignal}
           onUpdate={handleUpdateSignal}
         />
+      )}
+      {dbcImportModal && (
+        <div className="modal-overlay" onClick={handleCloseDbcModal}>
+          <div className="modal dbc-import-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Import DBC File</h2>
+              <button className="modal-close" onClick={handleCloseDbcModal}>×</button>
+            </div>
+            <div className="modal-body">
+              <p className="dbc-filename">
+                <i className="fa-solid fa-file-code" /> {dbcFileName}
+              </p>
+              
+              <div className="import-mode-selector">
+                <label>Import Mode:</label>
+                <p className="detected-count">
+                  <i className="fa-solid fa-signal" /> {frames.size} frame IDs currently detected
+                </p>
+                <div className="import-mode-options">
+                  <button 
+                    className={`import-mode-btn ${dbcImportMode === 'import' ? 'active' : ''}`}
+                    onClick={() => setDbcImportMode('import')}
+                  >
+                    <strong>Import</strong>
+                    <small>Add new, keeping existing signals</small>
+                  </button>
+                  <button 
+                    className={`import-mode-btn ${dbcImportMode === 'merge' ? 'active' : ''}`}
+                    onClick={() => setDbcImportMode('merge')}
+                  >
+                    <strong> Merge</strong>
+                    <small>Add signals to undecyphered bits only</small>
+                  </button>
+                  <button 
+                    className={`import-mode-btn ${dbcImportMode === 'replace' ? 'active' : ''}`}
+                    onClick={() => setDbcImportMode('replace')}
+                  >
+                    <strong>Replace</strong>
+                    <small>Replace all with imported signals (including non-detected frames)</small>
+                  </button>
+                </div>
+              </div>
+              
+              {dbcImportStatus?.loading && (
+                <p className="import-status loading">
+                  <i className="fa-solid fa-spinner fa-spin" /> Importing...
+                </p>
+              )}
+              {dbcImportStatus?.success && (
+                <p className="import-status success">
+                  <i className="fa-solid fa-check-circle" /> {dbcImportStatus.message}
+                </p>
+              )}
+              {dbcImportStatus?.error && (
+                <p className="import-status error">
+                  <i className="fa-solid fa-exclamation-circle" /> {dbcImportStatus.error}
+                </p>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={handleCloseDbcModal}>Cancel</button>
+              <button 
+                className="btn-import-confirm" 
+                onClick={handleDbcImport}
+                disabled={dbcImportStatus?.loading || dbcImportStatus?.success}
+              >
+                Import
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

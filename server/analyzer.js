@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 import fs from 'fs';
 import http from 'http';
+import { parseDbcFile, mergeDbcData } from './dbcParser.js';
 
 // WebSocket server for raw frames
 let rawServer = null;
@@ -232,6 +233,44 @@ function createApi(defaultLexicon) {
                     console.error('Error syncing signals:', error);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: 'Failed to sync signals' }));
+                }
+            });
+        } else if (pathname === '/api/signals/import-dbc' && req.method === 'POST') {
+            // Import DBC file
+            let body = '';
+            req.on('data', chunk => body += chunk);
+            req.on('end', () => {
+                try {
+                    const { content, mode = 'merge', detectedFrameIds = [] } = JSON.parse(body);
+                    
+                    // Parse the DBC content
+                    const imported = parseDbcFile(content);
+                    
+                    // Get existing data
+                    let existing = { messages: [] };
+                    try {
+                        existing = JSON.parse(fs.readFileSync(lexicon, 'utf8'));
+                    } catch (error) {
+                        // File doesn't exist or is invalid, start fresh
+                    }
+                    
+                    // Merge based on mode, passing detected frame IDs
+                    const merged = mergeDbcData(existing, imported, mode, detectedFrameIds);
+                    
+                    // Write back
+                    fs.writeFileSync(lexicon, JSON.stringify(merged, null, 4));
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ 
+                        success: true, 
+                        imported: imported.messages.length,
+                        total: merged.messages.length,
+                        signals: merged.messages.reduce((acc, m) => acc + m.signals.length, 0)
+                    }));
+                } catch (error) {
+                    console.error('Error importing DBC:', error);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to import DBC file: ' + error.message }));
                 }
             });
         } else {
