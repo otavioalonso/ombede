@@ -9,23 +9,15 @@ import './Analyzer.css';
 // TODO: * implement little-endian
 //       * implement signed
 
-// Color palette for signals - visually distinct colors
+// Color palette for signals
 const SIGNAL_COLORS = [
-  '#f56565', // red
-  '#4299e1', // blue
-  '#48bb78', // green
-  '#ed64a6', // pink
-  '#ecc94b', // yellow
-  '#38b2ac', // teal
-  '#667eea', // indigo
-  '#ed8936', // orange
-  '#9f7aea', // purple
-  '#fc8181', // light red
-  '#f6ad55', // light orange
-  '#68d391', // light green
-  '#63b3ed', // light blue
-  '#b794f4', // light purple
-  '#f687b3', // light pink
+  '#2ca0ffff',
+  '#48bb78',
+  '#ff009dff',
+  '#ecc94b',
+  '#ff0000ff',
+  '#9763f1ff',
+  '#ff6600ff',
 ];
 
 // Get a consistent color for a signal based on its name
@@ -33,7 +25,6 @@ function getSignalColor(signalName, index) {
   // Use index for consistent coloring within a frame
   return SIGNAL_COLORS[index % SIGNAL_COLORS.length];
 }
-
 
 // WebSocket hook for raw CAN frames
 function useRawCANWebSocket(onFrame) {
@@ -139,6 +130,7 @@ function CANMessageRow({
   fadeEnabled,
   fadeDecyphered,
   fadeUndecyphered,
+  showSignalColors,
   currentTime,
   selectedBits,
   onBitMouseDown,
@@ -153,19 +145,24 @@ function CANMessageRow({
   // Find signals that apply to this frame
   const frameSignals = signals.filter(s => s.frameId === frameId);
   
-  // Build a map of bit index -> signal color
+  // Build a map of bit index -> signal color (only if colors enabled)
   const signalColorMap = new Map();
-  frameSignals.forEach((s, signalIndex) => {
-    const color = getSignalColor(s.name, signalIndex);
-    const start = bigEndianStartBit(s.start_bit);
-    for (let i = 0; i < s.bit_length; i++) {
-      signalColorMap.set(start + i, color);
-    }
-  });
+  if (showSignalColors) {
+    frameSignals.forEach((s, signalIndex) => {
+      const color = getSignalColor(s.name, signalIndex);
+      const start = bigEndianStartBit(s.start_bit);
+      for (let i = 0; i < s.bit_length; i++) {
+        signalColorMap.set(start + i, color);
+      }
+    });
+  }
   
   // Helper to check if a bit index is covered by any signal
   const isBitDecyphered = (bitIndex) => {
-    return signalColorMap.has(bitIndex);
+    return frameSignals.some(s => {
+      const start = bigEndianStartBit(s.start_bit);
+      return bitIndex >= start && bitIndex < start + s.bit_length;
+    });
   };
 
   const fadedBits = new Set(lastChangeTime.map((time, i) => ({i:i, time:time})).filter(({i,time}) => {
@@ -227,18 +224,18 @@ function CANMessageRow({
       <div className="frame-signals">
         {frameSignals.map((s, i) => {
           const value = decodeSignal(bytes, s);
-          const color = getSignalColor(s.name, i);
+          const color = showSignalColors ? getSignalColor(s.name, i) : null;
           return (
             <span 
               key={i} 
               className="signal-badge" 
-              style={{ '--signal-color': color }}
+              style={color ? { '--signal-color': color } : {}}
               title={`Click to see graph. Bits ${bigEndianStartBit(s.start_bit)}-${bigEndianStartBit(s.start_bit) + s.bit_length - 1}`}
               onMouseEnter={() => { setHoveredSignal({ ...s, frameId }); }}
               onMouseLeave={() => { setHoveredSignal(null); }}
               onClick={() => onSignalClick(s, frameId)}
             >
-              <span className="signal-color-dot" style={{ backgroundColor: color }} />
+              {color && <span className="signal-color-dot" style={{ backgroundColor: color }} />}
               <span className="signal-name">{s.name}</span>
               <span className="signal-value">{formatValue(value, s)} {s.unit || ''}</span>
             </span>
@@ -255,6 +252,7 @@ export default function Signals() {
   const [fadeEnabled, setFadeEnabled] = useState(false);
   const [fadeDecyphered, setFadeDecyphered] = useState(false);
   const [fadeUndecyphered, setFadeUndecyphered] = useState(false);
+  const [showSignalColors, setShowSignalColors] = useState(false);
   const [currentTime, setCurrentTime] = useState(Date.now());
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectionStart, setSelectionStart] = useState(null);
@@ -659,39 +657,46 @@ export default function Signals() {
               ↷
             </button>
           </div>
-          <label>
-            <input 
-              type="checkbox" 
-              checked={fadeEnabled}
-              onChange={(e) => setFadeEnabled(e.target.checked)}
-            />
-            Fade inactive bits
-          </label>
-          <label>
-            <input 
-              type="checkbox" 
-              checked={fadeDecyphered}
-              onChange={(e) => setFadeDecyphered(e.target.checked)}
-            />
-            Fade decyphered bits
-          </label>
-          <label>
-            <input 
-              type="checkbox" 
-              checked={fadeUndecyphered}
-              onChange={(e) => setFadeUndecyphered(e.target.checked)}
-            />
-            Fade undecyphered bits
-          </label>
-          <label>
-            File:
+          <button 
+            className={`btn-toggle ${!fadeEnabled ? 'active' : ''}`}
+            onClick={() => setFadeEnabled(!fadeEnabled)}
+            title="Show bits that haven't changed recently"
+          >
+            <i className={`fa-solid ${!fadeEnabled ? 'fa-eye' : 'fa-eye-slash'}`} />
+            Inactive bits
+          </button>
+          <button 
+            className={`btn-toggle ${!fadeDecyphered ? 'active' : ''}`}
+            onClick={() => setFadeDecyphered(!fadeDecyphered)}
+            title="Show bits covered by signals"
+          >
+            <i className={`fa-solid ${!fadeDecyphered ? 'fa-eye' : 'fa-eye-slash'}`} />
+            Decyphered bits
+          </button>
+          <button 
+            className={`btn-toggle ${!fadeUndecyphered ? 'active' : ''}`}
+            onClick={() => setFadeUndecyphered(!fadeUndecyphered)}
+            title="Show bits not covered by signals"
+          >
+            <i className={`fa-solid ${!fadeUndecyphered ? 'fa-eye' : 'fa-eye-slash'}`} />
+            Undecyphered bits
+          </button>
+          <button 
+            className={`btn-toggle btn-colors ${showSignalColors ? 'active' : ''}`}
+            onClick={() => setShowSignalColors(!showSignalColors)}
+            title="Show colored highlights for signal bits"
+          >
+            Colors
+          </button>
+          <div className="file-input">
+            <span>File:</span>
             <input 
               type="text" 
               value={lexiconFile}
               onChange={(e) => setLexiconFile(e.target.value)}
               placeholder="lexicon.json"
             />
-          </label>
+          </div>
         </div>
       </header>
       {editingBitRange && (
@@ -700,6 +705,18 @@ export default function Signals() {
           <button onClick={() => setEditingBitRange(null)}>Cancel</button>
         </div>
       )}
+      <div className="bit-index-header">
+        <div className="frame-id-spacer" />
+        <div className="bit-indices">
+          {Array.from({ length: 8 }, (_, byteIdx) => (
+            <div key={byteIdx} className="byte-indices">
+              {Array.from({ length: 8 }, (_, bitIdx) => (
+                <span key={bitIdx} className="bit-index">{byteIdx * 8 + bitIdx}</span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
       <div className="signals-list">
         {sortedFrames.map(([frameId, frameData]) => {
           return (
@@ -711,6 +728,7 @@ export default function Signals() {
               fadeEnabled={fadeEnabled}
               fadeDecyphered={fadeDecyphered}
               fadeUndecyphered={fadeUndecyphered}
+              showSignalColors={showSignalColors}
               currentTime={currentTime}
               selectedBits={selectedBits}
               onBitMouseDown={handleBitMouseDown}

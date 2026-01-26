@@ -67,7 +67,7 @@
 
 .controls {
   display: flex;
-  gap: 2rem;
+  gap: 0.5rem;
   align-items: center;
   margin-right: 50px;
 }
@@ -75,6 +75,7 @@
 .undo-redo-buttons {
   display: flex;
   gap: 0.25rem;
+  margin-right: 0.5rem;
 }
 
 .btn-undo,
@@ -105,31 +106,97 @@
   cursor: not-allowed;
 }
 
-.controls label {
+.btn-toggle {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(99, 179, 237, 0.3);
+  border-radius: 6px;
+  background: rgba(26, 32, 44, 0.8);
+  color: #718096;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-toggle i {
+  font-size: 11px;
+  opacity: 0.5;
+  transition: all 0.1s ease;
+}
+
+.btn-toggle.active i {
+  opacity: 1;
+}
+
+.btn-toggle:hover {
+  background: rgba(99, 179, 237, 0.15);
+  border-color: rgba(99, 179, 237, 0.5);
+  color: #a0aec0;
+}
+
+.btn-toggle.active {
+  background: rgba(99, 179, 237, 0.25);
+  border-color: #63b3ed;
+  color: #63b3ed;
+}
+
+.btn-toggle.active:hover {
+  background: rgba(99, 179, 237, 0.35);
+}
+
+.btn-toggle.btn-colors.active {
+  background: linear-gradient(40deg, 
+    rgba(245, 101, 101, 1), 
+    /* rgba(237, 137, 54, 1),  */
+    rgba(236, 201, 75, 1), 
+    rgba(72, 187, 120, 1), 
+    rgba(66, 153, 225, 1), 
+    rgba(159, 122, 234, 1)
+  );
+  /* border-color: white; */
+  color: #e0e6ed;
+}
+
+.btn-toggle.btn-colors.active:hover {
+  background: linear-gradient(40deg,
+    rgba(245, 101, 101, 0.9), 
+    /* rgba(237, 137, 54, 0.9),  */
+    rgba(236, 201, 75, 0.9), 
+    rgba(72, 187, 120, 0.9), 
+    rgba(66, 153, 225, 0.9), 
+    rgba(159, 122, 234, 0.9)
+  );
+}
+
+.file-input {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 0.85rem;
-  /* color: #444; */
+  color: #718096;
+  margin-left: 0.5rem;
 }
 
-.controls input[type="checkbox"] {
-  accent-color: #222;
-}
-
-.controls input[type="text"] {
+.file-input input[type="text"] {
   width: 140px;
-  padding: 0.4rem 0.6rem;
-  background: #444;
-  border-radius: 5px;
-  color: #ddd;
+  height: 32px;
+  padding: 0 0.6rem;
+  background: rgba(26, 32, 44, 0.8);
+  border: 1px solid rgba(99, 179, 237, 0.3);
+  border-radius: 6px;
+  color: #a0aec0;
   font-size: 0.85rem;
+  box-sizing: border-box;
 }
 
-.controls input[type="text"]:focus {
+.file-input input[type="text"]:focus {
   outline: none;
-  background-color: #eee;
-  color: #222;
+  border-color: #63b3ed;
+  color: #e0e6ed;
 }
 
 .controls select {
@@ -204,6 +271,38 @@
   display: none;
 }
 
+.bit-index-header {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0.5rem;
+  margin-bottom: 2px;
+}
+
+.frame-id-spacer {
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.bit-indices {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.byte-indices {
+  display: flex;
+  gap: 1px;
+}
+
+.bit-index {
+  width: 10px;
+  border: 1px solid transparent;
+  font-size: 9px;
+  color: #718096;
+  text-align: center;
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  line-height: 1;
+}
+
 .can-message-row {
   display: flex;
   align-items: center;
@@ -251,7 +350,7 @@
   border-radius: 0px;
   cursor:pointer;
   flex-shrink: 0;
-  transition: border-color 0.15s ease;
+  /* transition: border-color 0.15s ease; */
 }
 
 .bit-square:hover {
@@ -276,7 +375,7 @@
 }
 
 .bit-square.has-signal.empty {
-  /* background: color-mix(in srgb, var(--signal-color) 15%, #fff); */
+  background: color-mix(in srgb, var(--signal-color) 85%, #fff);
 }
 
 .bit-square.has-signal.filled {
